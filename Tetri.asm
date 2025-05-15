@@ -119,8 +119,8 @@ GAMESCRHEIGHT       EQU  FRAMEHEIGHT * BLOCKSIZE     ;height of each screen in p
 BLOCKSIZE			EQU 20		;size of block is BLOCKSIZE x BLOCKSIZE pixels
 
 								;Tetris grid is 20X10, so each block is 20X20 pixels
-GAMELEFTSCRX        DW  100     ;top left corner X of left screen
-GAMELEFTSCRY        DW  54      ;top left corner Y of left screen
+GAMELEFTSCRX        DW  300     ;top left corner X of left screen
+GAMELEFTSCRY        DW  150      ;top left corner Y of left screen
 GAMERIGHTSCRX       DW  600     ;top left corner X of right screen
 GAMERIGHTSCRY       DW  54      ;top left corner Y of right screen
 
