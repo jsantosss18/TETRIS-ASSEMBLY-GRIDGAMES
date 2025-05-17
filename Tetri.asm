@@ -11,28 +11,28 @@ INCLUDE macros.inc
 LeftFrameTopWidth EQU  219
 LeftFrameTopHeight EQU 54
 LeftFrameTopFilename DB 'icetop.bin', 0
-LeftFrameTopX		 EQU 90
+LeftFrameTopX		 EQU 160    ; Centered X position
 LeftFrameTopY		 EQU 0
 LeftFrameTopFilehandle DW ?
 
 LeftFrameLeftWidth EQU  51
 LeftFrameLeftHeight EQU 426
 LeftFrameLeftFilename DB 'iceleft.bin', 0
-LeftFrameLeftX		 EQU 51
+LeftFrameLeftX		 EQU 130    ; Centered X position
 LeftFrameLeftY		 EQU 54
 LeftFrameLeftFilehandle DW ?
 
 LeftFrameRightWidth EQU  43
 LeftFrameRightHeight EQU 426
 LeftFrameRightFilename DB 'iceright.bin', 0
-LeftFrameRightX		 EQU 297
+LeftFrameRightX		 EQU 340    ; Centered X position
 LeftFrameRightY		 EQU 54
 LeftFrameRightFilehandle DW ?
 
 LeftFrameBottomWidth EQU  197
 LeftFrameBottomHeight EQU 54
 LeftFrameBottomFilename DB 'icebot.bin', 0
-LeftFrameBottomX		 EQU 101
+LeftFrameBottomX		 EQU 140    ; Centered X position
 LeftFrameBottomY		 EQU 451
 LeftFrameBottomFilehandle DW ?
 
@@ -70,12 +70,16 @@ GAMESCRHEIGHT       EQU  FRAMEHEIGHT * BLOCKSIZE     ;height of each screen in p
 BLOCKSIZE			EQU 20		;size of block is BLOCKSIZE x BLOCKSIZE pixels
 
 								;Tetris grid is 20X10, so each block is 20X20 pixels
-GAMELEFTSCRX        DW  100     ;top left corner X of left screen
-GAMELEFTSCRY        DW  54      ;top left corner Y of left screen
+GAMELEFTSCRX        DW  180     ; Centered X position (originally 100)
+GAMELEFTSCRY        DW  100      ;top left corner Y of left screen
 
 FRAMETEXTOFFSET		EQU 50
 
 DeltaScore			EQU 1		;amount of score a player gains by clearing a line
+LevelSpeedIncrease  EQU 1       ;speed increase per level
+CurrentLevel        DB  1       ;current game level
+LevelUpThreshold    EQU 10      ;score needed to level up
+GameTimer           DW  0       ;game timer for progressive difficulty
 
 ;; Position of player names 
 
@@ -131,6 +135,11 @@ leftPieceLocY				DB	?			;the Ycoord of the top left corner
 leftPieceData				DB	16 DUP(?)	;contains the 4x4 matrix of the piece (after orientation)
 leftPieceSpeed				DB	1			;contains the falling speed of the left piece
 
+reservedPieceId				DB	?			;ID of reserved piece
+reservedPieceOrientation	DB	?			;orientation of reserved piece
+reservedPieceData			DB	16 DUP(?)	;data of reserved piece
+hasReservedPiece			DB	0			;flag indicating if there's a reserved piece
+
 tempPieceOffset				DW	?			;contains the address of the current piece
 
 ;;Coliision piece info
@@ -159,7 +168,7 @@ leftDownCode			DB	1Fh		;S key
 leftLeftCode			DB	1Eh		;A key
 leftRightCode			DB	20h		;D key
 leftRotCode				DB	11h		;W key
-shiftKeyCode      DB  2Ah     ; Left Shift key
+shiftKeyCode      		DB  2Ah     ; Left Shift key
 
 ;General ScanCodes
 EnterCode  DB 1CH
@@ -176,15 +185,31 @@ NEXTPIECETEXT		DB	"Next"
 LEFTNEXTPIECELOCX	EQU 45
 LEFTNEXTPIECELOCY	EQU 4
 
+RESERVETEXTLENGTH	EQU 7
+RESERVETEXT			DB	"Reserve"
+RESERVELOCX			EQU 45
+RESERVELOCY			EQU 10
+
 SCORETEXTLENGTH		EQU 6
 SCORETEXT			DB	"Score:"
 LeftScoreLocX		EQU 23
 LeftScoreLocY		EQU 33
 
+LevelLabelText      DB  "Level:"
+LevelLabelLength    EQU 6     ; Length of "Level:"
+LevelLabelX         EQU 23    ; X position of label
+LevelLabelY         EQU 36    ; Y position of label
+
 LeftScoreTextLength EQU 2
 LeftScoreText		DB "00"
 LeftScoreStringLocX	EQU LeftScoreLocX+7
 LeftScoreStringLocY	EQU LeftScoreLocY
+
+LevelValueText      DB  "01"  ; Initial level display (as string)
+LevelValueLength    EQU 2     ; Length of level number
+LevelValueX         EQU LevelLabelX + 7  ; X position right after label
+LevelValueY         EQU LevelLabelY      ; Same Y as label
+
 
 ;; Aux screen strings
 
@@ -226,10 +251,7 @@ RPly1  DB  0
 SPACE 		DB ' '
 NAME1		DB 15
 Ply1Sz		DB ?
-Player1		DB 10 DUP(' ')
-NAME2 		DB 15
-Ply2Sz		DB ?
-Player2		DB 10 DUP(' ')
+Player1 	DB 10 DUP(' '), '$'
 NameSz		EQU 6
 
 ;-------General vars-------
@@ -248,9 +270,9 @@ NewGame:
 		CALL InitializeNewGame
 		CALL DisplayMenu 
 ;-----------------------------------------------
-		mov     AX, 4F02H
-        mov     BX, 0105H
-        INT     10H
+		MOV AX, 4F02H
+        MOV BX, 0105H
+        INT 10H
 
 		CALL DrawGameScr
 		CALL DrawGUIText
@@ -270,6 +292,8 @@ NewGame:
 GAMELP:	
 		CALL ParseInput
 		CALL PieceGravity
+		CALL UpdateGameTimer
+		CALL CheckLevelUp
 		MOV AL,GameFlag
 		CMP AL,1
 		JNZ Finished
@@ -284,10 +308,12 @@ MAIN    ENDP
 ;---------------------------
 InitializeNewGame 	PROC	NEAR
 					
-					MOV leftPieceSpeed , 1			;contains the falling speed of the left piece
-					;MOV Player1Score, 0			;score of first player
+					MOV leftPieceSpeed , 1		;contains the falling speed of the left piece
+					MOV CurrentLevel, 1			;reset level
+					MOV GameTimer, 0			;reset timer
 					
 					MOV RPly1,0
+					MOV hasReservedPiece, 0		;reset reserve flag
 					
 					MOV collisionPieceSpeed	, 1
 					
@@ -297,6 +323,124 @@ InitializeNewGame 	PROC	NEAR
 					RET
 InitializeNewGame 	ENDP
 ;---------------------------
+; Update game timer for progressive difficulty
+UpdateGameTimer PROC NEAR
+    INC GameTimer
+    RET
+UpdateGameTimer ENDP
+
+;---------------------------
+; Check if player should level up
+CheckLevelUp PROC NEAR
+    ; Compare score to level up threshold
+    ; If score >= LevelUpThreshold * CurrentLevel, level up
+    ; Increase speed and reset timer
+    ; This is a placeholder - implement your actual level up logic
+    RET
+CheckLevelUp ENDP
+
+;---------------------------
+; Swap current piece with reserved piece or store current piece if none reserved
+SwapReservedPiece PROC NEAR
+    PUSHA
+    
+    ; If no reserved piece, store current piece and get new piece
+    CMP hasReservedPiece, 0
+    JNE HasReserved
+    
+    ; Store current piece in reserve
+    MOV SI, offset leftPieceId
+    MOV DI, offset reservedPieceId
+    MOV CX, 20
+    REP MOVSB
+    
+    MOV hasReservedPiece, 1
+    
+    ; Get new piece
+    CALL GenerateRandomPiece
+    JMP EndSwap
+    
+HasReserved:
+    ; Swap current piece with reserved piece
+    MOV SI, offset leftPieceId
+    MOV DI, offset reservedPieceId
+    MOV BX, offset tempPieceOffset  ; Use as temp storage
+    
+    ; Store current piece in temp
+    MOV CX, 20
+    REP MOVSB
+    
+    ; Move reserved to current
+    MOV SI, offset reservedPieceId
+    MOV DI, offset leftPieceId
+    MOV CX, 20
+    REP MOVSB
+    
+    ; Move temp to reserved
+    MOV SI, offset tempPieceOffset
+    MOV DI, offset reservedPieceId
+    MOV CX, 20
+    REP MOVSB
+    
+EndSwap:
+    ; Redraw pieces
+    CALL DrawPiece
+    CALL DrawReservedPiece
+    
+    POPA
+    RET
+SwapReservedPiece ENDP
+
+;---------------------------
+; Draw the reserved piece in its area
+DrawReservedPiece PROC NEAR
+    CMP hasReservedPiece, 0
+    JE NoReservedPiece
+    
+    PUSHA
+    
+    ; Set up to draw reserved piece at reserved area
+    MOV CX, 13      ; X position
+    MOV DX, 12      ; Y position
+    MOV SI, offset reservedPieceData
+    MOV BX, 0
+    
+DrawReservedLoop:
+    MOV AL, [SI+BX]
+    CMP AL, 0
+    JE SkipReservedBlock
+    
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Calculate block position
+    MOV AX, BX
+    MOV CL, 4
+    DIV CL          ; AH = x offset, AL = y offset
+    
+    ADD CL, AH      ; Add x offset
+    ADD DL, AL      ; Add y offset
+    
+    CALL DrawBlockClr
+    
+    POP DX
+    POP CX
+    POP BX
+    
+SkipReservedBlock:
+    INC BX
+    CMP BX, 16
+    JB DrawReservedLoop
+    
+    POPA
+    
+NoReservedPiece:
+    RET
+DrawReservedPiece ENDP
+
+;---------------------------
+
 ;This PROC draws the screens of the two players given the parameters in data segment
 ;@param     none
 ;@return    none
@@ -842,73 +986,69 @@ RotatePiece		ENDP
 ;This procedure parses input and calls corresponding procedures
 ;@param			none
 ;@return		none
-ParseInput		PROC	NEAR
-		MOV AH, 1
-		INT 16H
-		JNZ YesInput
-		RET
+; Modified ParseInput to handle shift key for reserve
+ParseInput PROC NEAR
+    MOV AH, 1
+    INT 16H
+    JNZ YesInput
+    RET
 YesInput:
-		MOV AH, 0
-		INT 16H
-ExitGame:
-		CMP AH, ESCCode
-		JNZ LeftRotKey
-
-		;------ this should be changed to return to menu instead
-		CALL EndGame
-
-		JMP BreakParseInput
+    MOV AH, 0
+    INT 16H
+    
+    CMP AH, ESCCode
+    JNZ LeftRotKey
+    CALL EndGame
+    JMP BreakParseInput
+    
 LeftRotKey:
-		CMP AH, leftRotCode
-		JNZ LeftLeftKey
-
-		JZ LeftRotKeyParsed
-
-		MOV SI, 0
-		CALL GetTempPiece
-
-		MOV SI,0
-		CALL RotatePiece
-LeftRotKeyParsed:
-		JMP BreakParseInput
+    CMP AH, leftRotCode
+    JNZ LeftLeftKey
+    MOV SI, 0
+    CALL GetTempPiece
+    MOV SI,0
+    CALL RotatePiece
+    JMP BreakParseInput
+    
 LeftLeftKey:
-		CMP AH, leftLeftCode
-		JNZ LeftDownKey
-		MOV SI, 0
-		CALL GetTempPiece
-
-		MOV SI, 0
-		MOV BX, 1
-		CALL MovePiece
-
-		JMP BreakParseInput
+    CMP AH, leftLeftCode
+    JNZ LeftDownKey
+    MOV SI, 0
+    CALL GetTempPiece
+    MOV SI, 0
+    MOV BX, 1
+    CALL MovePiece
+    JMP BreakParseInput
+    
 LeftDownKey:
-		CMP AH, leftDownCode
-		JNZ LeftRightKey
-		MOV SI, 0
-		CALL GetTempPiece
-
-		MOV SI,0
-		MOV BX,0
-		CALL MovePiece
-
-
-		JMP BreakParseInput
+    CMP AH, leftDownCode
+    JNZ LeftRightKey
+    MOV SI, 0
+    CALL GetTempPiece
+    MOV SI,0
+    MOV BX,0
+    CALL MovePiece
+    JMP BreakParseInput
+    
 LeftRightKey:
-		CMP AH, leftRightCode
-		;JNZ RightRotKey
-		MOV SI, 0
-		CALL GetTempPiece
-
-		MOV SI,0
-		MOV BX,2
-		CALL MovePiece
-
-		JMP BreakParseInput
-
+    CMP AH, leftRightCode
+    JNZ ShiftKey
+    MOV SI, 0
+    CALL GetTempPiece
+    MOV SI,0
+    MOV BX,2
+    CALL MovePiece
+    JMP BreakParseInput
+    
+ShiftKey:
+    CMP AH, shiftKeyCode
+    JNZ BreakParseInput
+    CALL SwapReservedPiece
+    
 BreakParseInput:
-		RET
-ParseInput		ENDP
+    RET
+ParseInput ENDP
+
 ;---------------------------
 ;This Procedure is called in the gameloop to move the pieces downward each second
 ;@param			none
@@ -1527,72 +1667,41 @@ DrawLogoMenu 	ENDP
 ;Procedure to get player name
 ;@param		none (proper GFX mode)
 ;@			none
-GetName		PROC 	NEAR
-				;call videomode13h
-				MOV AH, 00H ; Set video mode
-				MOV AL, 13H ; Mode 13h
-				INT 10H 
-				
-				MOV BP, OFFSET Menu11 ; ES: BP POINTS TO THE TEXT
-				MOV CX,M11sz ;SIZE OF STRING
-				MOV DH, 6 ;ROW TO PLACE STRING
-				MOV DL, 10 ; COLUMN TO PLACE STRING
-				MOV BL, 15 ;WHITE
-				CALL PrintMessage
+; Modified GetName to only ask for one name
+GetName PROC NEAR
+    ;call videomode13h
+    MOV AH, 00H ; Set video mode
+    MOV AL, 13H ; Mode 13h
+    INT 10H 
+    
+    MOV BP, OFFSET Menu11 ; ES: BP POINTS TO THE TEXT
+    MOV CX,M11sz ;SIZE OF STRING
+    MOV DH, 6 ;ROW TO PLACE STRING
+    MOV DL, 10 ; COLUMN TO PLACE STRING
+    MOV BL, 15 ;WHITE
+    CALL PrintMessage
 
-				MOV DH, 11 ;ROW TO PLACE CURSOR
-				MOV DL, 10 ; COLUMN TO PLACE CURSOR
-				CALL MoveCursor
+    MOV DH, 11 ;ROW TO PLACE CURSOR
+    MOV DL, 10 ; COLUMN TO PLACE CURSOR
+    CALL MoveCursor
 
+    MOV DX,OFFSET NAME1
+    CALL GetMessage
 
-				MOV DX,OFFSET NAME1
-				CALL GetMessage
+    MOV BP, OFFSET Menu12 ; ES: BP POINTS TO THE TEXT
+    MOV CX, M12sz ; LENGTH OF THE STRING
+    MOV DH, 14 ;ROW TO PLACE STRING
+    MOV DL, 10 ; COLUMN TO PLACE STRING
+    MOV BL, 15 ;WHITE                
+    CALL PrintMessage
 
+    WAIT4Enter: CALL Wait4Key            
+                CMP AH, EnterCode
+                JNE WAIT4Enter
+                
+    RET
+GetName ENDP
 
-				MOV BP, OFFSET Menu12 ; ES: BP POINTS TO THE TEXT
-				MOV CX, M12sz ; LENGTH OF THE STRING
-				MOV DH, 14 ;ROW TO PLACE STRING
-				MOV DL, 10 ; COLUMN TO PLACE STRING
-				MOV BL, 15 ;WHITE				
-				CALL PrintMessage
-
-				WAIT4Enter: CALL Wait4Key			
-							CMP AH,	EnterCode
-							JNE WAIT4Enter
-							
-				;Call ClearScreen
-				MOV AH, 00H ; Set video mode
-				MOV AL, 13H ; Mode 13h
-				INT 10H 
-
-				MOV BP, OFFSET Menu11 ; ES: BP POINTS TO THE TEXT
-				MOV CX,M11sz ;SIZE OF STRING
-				MOV DH, 6 ;ROW TO PLACE STRING
-				MOV DL, 10 ; COLUMN TO PLACE STRING
-				MOV BL, 15 ;WHITE				
-				CALL PrintMessage
-
-				MOV DH, 11 ;ROW TO PLACE CURSOR
-				MOV DL, 10 ; COLUMN TO PLACE CURSOR
-				CALL MoveCursor
-
-
-				MOV DX,OFFSET NAME2
-				CALL GetMessage
-
-
-				MOV BP, OFFSET Menu12 ; ES: BP POINTS TO THE TEXT
-				MOV CX, M12sz ; LENGTH OF THE STRING
-				MOV DH, 14 ;ROW TO PLACE STRING
-				MOV DL, 10 ; COLUMN TO PLACE STRING
-				MOV BL, 15 ;WHITE
-				CALL PrintMessage
-							
-				WAIT4Enter2: CALL Wait4Key
-							 CMP AH,	EnterCode
-							 JNE WAIT4Enter2			
-			RET
-GetName		ENDP			
 ;---------------------------
 ;Procedure to show menu on opening the game 
 ;@param			none
@@ -1749,62 +1858,102 @@ ChangeScoreToText	ENDP
 ;This procedure is responsible for drawing the text for the UI
 ;@param				none
 ;@return			none
-DrawGUIText		PROC	NEAR
-				PUSHA
+; Modified DrawGUIText to include reserve and level displays
+DrawGUIText PROC NEAR
+    PUSHA
 
-				;score bars
-				;top
-				mov ah, 13h
-				mov cx, UnderlineStringLength
-				mov dh, LeftScoreLocY-2
-				mov dl, 0
-				lea bp, UnderlineString
-				mov bx, 07h
-				int 10h
+    ;score bars
+    ;top
+    mov ah, 13h
+    mov cx, UnderlineStringLength
+    mov dh, LeftScoreLocY-2
+    mov dl, 0
+    lea bp, UnderlineString
+    mov bx, 07h
+    int 10h
 
-				;bottom
-				mov ah, 13h
-				mov cx, UnderlineStringLength
-				mov dh, LeftScoreLocY+1
-				mov dl, 0
-				lea bp, UnderlineString
-				mov bx, 07h
-				int 10h
-			
+    ;bottom
+    mov ah, 13h
+    mov cx, UnderlineStringLength
+    mov dh, LeftScoreLocY+1
+    mov dl, 0
+    lea bp, UnderlineString
+    mov bx, 07h
+    int 10h
 
-				;render the left screen next piece text
-				mov ah, 13h
-				mov cx, NEXTPIECETEXTLENGTH
-				mov dh, LEFTNEXTPIECELOCY
-				mov dl, LEFTNEXTPIECELOCX
-				lea bp, NEXTPIECETEXT
-				mov bx, 11d
-				int 10h
-				
-				;render the left screen score text
-				mov ah, 13h
-				mov cx, SCORETEXTLENGTH
-				mov dh, LeftScoreLocY
-				mov dl, LeftScoreLocX
-				lea bp, SCORETEXT
-				mov bx, 11d
-				int 10h
-				
-				;render the left screen score text
-				mov ah, 13h
-				mov cx, NameSz
-				mov dh, LeftPlyLocY
-				mov dl, LeftPlyLocX
-				lea bp, Player1
-				mov bx, 11d
-				int 10h
+    ;render the left screen next piece text
+    mov ah, 13h
+    mov cx, NEXTPIECETEXTLENGTH
+    mov dh, LEFTNEXTPIECELOCY
+    mov dl, LEFTNEXTPIECELOCX
+    lea bp, NEXTPIECETEXT
+    mov bx, 11d
+    int 10h
+    
+    ;render the reserve text
+    mov ah, 13h
+    mov cx, RESERVETEXTLENGTH
+    mov dh, RESERVELOCY
+    mov dl, RESERVELOCX
+    lea bp, RESERVETEXT
+    mov bx, 11d
+    int 10h
+    
+    ;render the left screen score text
+    mov ah, 13h
+    mov cx, SCORETEXTLENGTH
+    mov dh, LeftScoreLocY
+    mov dl, LeftScoreLocX
+    lea bp, SCORETEXT
+    mov bx, 11d
+    int 10h
+    
+    ;render the level text
+    mov ah, 13h
+    mov cx, LevelLabelText
+    mov dh, LevelValueY
+    mov dl, LevelValueX
+    lea bp, LevelValueText
+    mov bx, 11d
+    int 10h
+    
+    ;render the player name
+    mov ah, 13h
+    mov cx, NameSz
+    mov dh, LeftPlyLocY
+    mov dl, LeftPlyLocX
+    lea bp, Player1
+    mov bx, 11d
+    int 10h
 
-				CALL UpdatePlayerScore	;render the score itself
-				
-				POPA
-				RET
-DrawGUIText		ENDP
-;---------------------------------------------------
+    CALL UpdatePlayerScore    ;render the score itself
+    CALL UpdateLevelDisplay   ;render the level
+    
+    POPA
+    RET
+DrawGUIText ENDP
+
+;---------------------------
+; Update level display
+UpdateLevelDisplay PROC NEAR
+    PUSHA
+    MOV AL, CurrentLevel
+    LEA SI, LevelValueText
+    CALL ParseIntToString
+    
+    mov ah, 13h
+    mov cx, LevelLabelText
+    mov dh, LevelValueY
+    mov dl, LevelValueX
+    lea bp, LevelValueText
+    mov bx, 11d
+    int 10h
+
+    POPA
+    RET
+UpdateLevelDisplay ENDP
+
+;---------------------------
 ;This procedure parses the scores of the two players and changes
 ;it to strings, then draws them on the screen
 ;@param			none
