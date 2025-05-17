@@ -1,0 +1,9 @@
+
+ Start  Stop   Length Name               Class
+
+ 00000H 0121FH 01220H TETRI_TEXT         CODE
+ 01220H 0BE1EH 0ABFFH _DATA              DATA
+ 0BE20H 0C01FH 00200H STACK              STACK
+
+Program entry point at 0000:0000
+
