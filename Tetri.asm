@@ -1,4 +1,4 @@
-;x86 asm Tetris
+;x86 asm Tetris - Singleplayer Version
 ;Microprocessors Project
 ;--------------------------- 
 INCLUDE macros.inc
@@ -36,34 +36,6 @@ LeftFrameBottomX		 EQU 101
 LeftFrameBottomY		 EQU 451
 LeftFrameBottomFilehandle DW ?
 
-RightFrameTopWidth EQU  248
-RightFrameTopHeight EQU 53
-RightFrameTopFilename DB 'firetop.bin', 0
-RightFrameTopX		 EQU 576
-RightFrameTopY		 EQU 1
-RightFrameTopFilehandle DW ?
-
-RightFrameLeftWidth EQU  41
-RightFrameLeftHeight EQU 458
-RightFrameLeftFilename DB 'fireleft.bin', 0
-RightFrameLeftX		 EQU 561
-RightFrameLeftY		 EQU 54
-RightFrameLeftFilehandle DW ?
-
-RightFrameRightWidth EQU  49
-RightFrameRightHeight EQU 461
-RightFrameRightFilename DB 'firer.bin', 0
-RightFrameRightX		 EQU 797
-RightFrameRightY		 EQU 54
-RightFrameRightFilehandle DW ?
-
-RightFrameBottomWidth EQU  199
-RightFrameBottomHeight EQU 63
-RightFrameBottomFilename DB 'firebot.bin', 0
-RightFrameBottomX		 EQU 598
-RightFrameBottomY		 EQU 452
-RightFrameBottomFilehandle DW ?
-
 WideFrameWIDTH	EQU	250
 WideFrameHEIGHT EQU	60
 WideFrameData	DB	WideFrameHEIGHT*WideFrameWIDTH DUP(0)
@@ -87,27 +59,6 @@ LogoFilehandle 		DW ?
 positionInLogoFile 	DW 0	
 LogoData			DB  0
 
-;--------Powerups-------
-
-PowerupEveryPoint				EQU 4
-
-Player1Score					DB 0			;score of first player
-leftPowerupFreezeCount			DB 0
-leftPowerupSpeedUpCount			DB 0
-leftPowerupRemoveLinesCount		DB 0
-leftPowerupChangePieceCount		DB 0
-leftPowerupInsertTwoLinesCount	DB 0
-leftPieceRotationLock 			DB 0 	;lock the rotation of the piece 0:locked 1:free
-
-Player2Score					DB 0
-rightPowerupFreezeCount			DB 0
-rightPowerupSpeedUpCount		DB 0
-rightPowerupRemoveLinesCount	DB 0
-rightPowerupChangePieceCount	DB 0
-rightPowerupInsertTwoLinesCount	DB 0
-rightPieceRotationLock			DB 0	;lock the rotation of the piece 0:locked 1:free
-
-
 ;--------GameData-------
 
 FRAMEWIDTH        	EQU  10      ;width of each frame in blocks
@@ -119,11 +70,8 @@ GAMESCRHEIGHT       EQU  FRAMEHEIGHT * BLOCKSIZE     ;height of each screen in p
 BLOCKSIZE			EQU 20		;size of block is BLOCKSIZE x BLOCKSIZE pixels
 
 								;Tetris grid is 20X10, so each block is 20X20 pixels
-GAMELEFTSCRX        DW  300     ;top left corner X of left screen
-GAMELEFTSCRY        DW  150      ;top left corner Y of left screen
-GAMERIGHTSCRX       DW  600     ;top left corner X of right screen
-GAMERIGHTSCRY       DW  54      ;top left corner Y of right screen
-
+GAMELEFTSCRX        DW  100     ;top left corner X of left screen
+GAMELEFTSCRY        DW  54      ;top left corner Y of left screen
 
 FRAMETEXTOFFSET		EQU 50
 
@@ -131,19 +79,18 @@ DeltaScore			EQU 1		;amount of score a player gains by clearing a line
 
 ;; Position of player names 
 
-RightPlyLocX		EQU RightScoreLocX-10
-RightPlyLocY		EQU RightScoreLocY
 LeftPlyLocX			EQU LeftScoreLocX-10
 LeftPlyLocY			EQU LeftScoreLocY
 
 ;------Pieces Data------
 
+
 ;; Constant pieces data
 
-firstPiece 					DB 0,0,0,0,11,11,11,11,0,0,0,0,0,0,0,0	;Line shape
-firstPiece1					DB 0,11,0,0,0,11,0,0,0,11,0,0,0,11,0,0	;Line shape after one rotation
-firstPiece2					DB 0,0,0,0,11,11,11,11,0,0,0,0,0,0,0,0	;Line shape after two rotations
-firstPiece3					DB 0,11,0,0,0,11,0,0,0,11,0,0,0,11,0,0	;Line shape after Three rotations
+firstPiece 					DB 0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0	;Line shape
+firstPiece1					DB 0,5,0,0,0,5,0,0,0,5,0,0,0,5,0,0	;Line shape after one rotation
+firstPiece2					DB 0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0	;Line shape after two rotations
+firstPiece3					DB 0,5,0,0,0,5,0,0,0,5,0,0,0,5,0,0	;Line shape after Three rotations
 
 secondPiece					DB 1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0	;J shape
 secondPiece1				DB 0,1,1,0,0,1,0,0,0,1,0,0,0,0,0,0	;J shape after one rotation
@@ -184,13 +131,6 @@ leftPieceLocY				DB	?			;the Ycoord of the top left corner
 leftPieceData				DB	16 DUP(?)	;contains the 4x4 matrix of the piece (after orientation)
 leftPieceSpeed				DB	1			;contains the falling speed of the left piece
 
-rightPieceId				DB	?			;contains the ID of the current piece
-rightPieceOrientation		DB	?			;contains the current orientation of the piece
-rightPieceLocX				DB	?			;the Xcoord of the top left corner
-rightPieceLocY				DB	?			;the Ycoord of the top left corner
-rightPieceData				DB	16 DUP(?)	;contains the 4x4 matrix of the piece (after orientation)
-rightPieceSpeed				DB	1			;contains the falling speed of the right piece
-
 tempPieceOffset				DW	?			;contains the address of the current piece
 
 ;;Coliision piece info
@@ -210,12 +150,6 @@ nextLeftPieceLocX				DB	?			;the Xcoord of the top left corner
 nextLeftPieceLocY				DB	?			;the Ycoord of the top left corner
 nextLeftPieceData				DB	16 DUP(?)	;contains the 4x4 matrix of the piece (after orientation)
 
-nextRightPieceId				DB	?			;contains the ID of the current piece
-nextRightPieceOrientation		DB	?			;contains the current orientation of the piece
-nextRightPieceLocX				DB	?			;the Xcoord of the top left corner
-nextRightPieceLocY				DB	?			;the Ycoord of the top left corner
-nextRightPieceData				DB	16 DUP(?)	;contains the 4x4 matrix of the piece (after orientation)
-
 tempNextPieceOffset				DW	?			;contains the address of the next piece
 
 ;--------Controls-------
@@ -225,28 +159,12 @@ leftDownCode			DB	1Fh		;S key
 leftLeftCode			DB	1Eh		;A key
 leftRightCode			DB	20h		;D key
 leftRotCode				DB	11h		;W key
-leftPower1				DB  02h		;1 key
-leftPower2				DB  03h		;2 key
-leftPower3				DB  04h		;3 key
-leftPower4				DB  05h		;4 key
-leftPower5				DB  06h		;5 key
-
-;Controls for right screen
-rightDownCode			DB	50h		;downArrow key
-rightLeftCode			DB	4Bh 	;leftArrow key
-rightRightCode			DB	4Dh		;rightArrow key
-rightRotCode			DB	48h 	;upArrow key
-rightPower1				DB	31h		;N key
-rightPower2				DB	32h		;M key
-rightPower3				DB	33h 	;, key
-rightPower4				DB	34h		;. key
-rightPower5				DB	35h		;/ key
+shiftKeyCode      DB  2Ah     ; Left Shift key
 
 ;General ScanCodes
 EnterCode  DB 1CH
 F1Code     DB 3BH
 F2Code     DB 3CH
-F10Code    DB 44H 
 EscCode	   DB 01H
 
 ;--------Strings--------
@@ -257,25 +175,16 @@ NEXTPIECETEXTLENGTH EQU 4
 NEXTPIECETEXT		DB	"Next"
 LEFTNEXTPIECELOCX	EQU 45
 LEFTNEXTPIECELOCY	EQU 4
-RIGHTNEXTPIECELOCX	EQU 108
-RIGHTNEXTPIECELOCY	EQU 4
 
 SCORETEXTLENGTH		EQU 6
 SCORETEXT			DB	"Score:"
 LeftScoreLocX		EQU 23
 LeftScoreLocY		EQU 33
-RightScoreLocX		EQU 87
-RightScoreLocY		EQU 33
 
 LeftScoreTextLength EQU 2
 LeftScoreText		DB "00"
 LeftScoreStringLocX	EQU LeftScoreLocX+7
 LeftScoreStringLocY	EQU LeftScoreLocY
-
-RightScoreTextLength 	EQU 2
-RightScoreText			DB "00"
-RightScoreStringLocX	EQU RightScoreLocX+7
-RightScoreStringLocY	EQU RightScoreLocY
 
 ;; Aux screen strings
 
@@ -293,15 +202,13 @@ Menu12 	DB "Press Enter Key to Continue"
 M12sz	EQU 27
 Menu21 	DB ", Press F2 to play"
 M21sz	EQU 18
-Menu22 	DB ", Press F10 to play"
-M22sz	EQU 19 
 
 Logo2     DB "*To play tetris press F2"
 L2sz   	  EQU 24
 Logo3     DB "*To end the program press Esc"
 L3sz   	  EQU 29
 Logo4	  DB "*To main menu press Enter"
-L4sz	  EQU 25	
+L4sz	  EQU 25
 
 GameEnded1	DB "Game ended"
 GE1sz		EQU 10
@@ -315,7 +222,6 @@ GE2Y		EQU 34
 
 Ready  DB 'R'
 RPly1  DB  0
-RPly2  DB  0
 
 SPACE 		DB ' '
 NAME1		DB 15
@@ -377,26 +283,11 @@ Finished:
 MAIN    ENDP
 ;---------------------------
 InitializeNewGame 	PROC	NEAR
-					MOV rightPieceSpeed , 1			;contains the falling speed of the right piece
-					MOV Player2Score , 0
-					MOV rightPowerupFreezeCount	, 0
-					MOV rightPowerupSpeedUpCount , 0
-					MOV rightPowerupRemoveLinesCount , 0
-					MOV rightPowerupChangePieceCount , 0
-					MOV	rightPowerupInsertTwoLinesCount	, 0
-					MOV	rightPieceRotationLock ,0
 					
 					MOV leftPieceSpeed , 1			;contains the falling speed of the left piece
-					MOV Player1Score, 0			;score of first player
-					MOV leftPowerupFreezeCount	,  0
-					MOV leftPowerupSpeedUpCount	,  0
-					MOV leftPowerupRemoveLinesCount	,0
-					MOV leftPowerupChangePieceCount	, 	0
-					MOV leftPowerupInsertTwoLinesCount	,	0
-					MOV leftPieceRotationLock ,0
+					;MOV Player1Score, 0			;score of first player
 					
 					MOV RPly1,0
-					MOV Rply2,0
 					
 					MOV collisionPieceSpeed	, 1
 					
@@ -458,7 +349,6 @@ DRAWVER:
 	JNE	DRAWFRAME
 
 	CALL DrawLeftBorder
-	CALL DrawRightBorder
 	RET
 DrawGameScr ENDP
 ;---------------------------
@@ -640,13 +530,13 @@ SetNextPieceData	ENDP
 GetTempPiece	PROC	NEAR
 		PUSH SI
 		CMP SI, 0					;If the screen is left
-		JNZ	RIGHT
+		;JNZ	RIGHT
 		LEA SI, leftPieceId			;copy the leftPieceOffset to SI
 		MOV tempPieceOffset, SI		;load the leftPieceOffset to tempPieceOffset
 		JMP EXT
-RIGHT:										;else if the screen is right
-		LEA SI, rightPieceId		;copy the rightPieceOffset to SI
-		MOV tempPieceOffset, SI		;load the rightPieceOffset to tempPieceOffset
+;RIGHT:										;else if the screen is right
+		;LEA SI, rightPieceId		;copy the rightPieceOffset to SI
+		;MOV tempPieceOffset, SI		;load the rightPieceOffset to tempPieceOffset
 EXT:	POP SI
 		RET
 GetTempPiece	ENDP
@@ -657,13 +547,13 @@ GetTempPiece	ENDP
 GetTempNextPiece	PROC	NEAR
 		PUSH SI
 		CMP SI, 0					;If the screen is left
-		JNZ	RIGHT1
+		;JNZ	RIGHT1
 		LEA SI, nextLeftPieceId			;copy the leftPieceOffset to SI
 		MOV tempNextPieceOffset, SI		;load the leftPieceOffset to tempPieceOffset
 		JMP EXT1
-RIGHT1:										;else if the screen is right
-		LEA SI, nextRightPieceId		;copy the rightPieceOffset to SI
-		MOV tempNextPieceOffset, SI		;load the rightPieceOffset to tempPieceOffset
+;RIGHT1:										;else if the screen is right
+		;LEA SI, nextRightPieceId		;copy the rightPieceOffset to SI
+		;MOV tempNextPieceOffset, SI		;load the rightPieceOffset to tempPieceOffset
 EXT1:	POP SI
 		RET
 GetTempNextPiece	ENDP
@@ -972,7 +862,6 @@ LeftRotKey:
 		CMP AH, leftRotCode
 		JNZ LeftLeftKey
 
-		CMP leftPieceRotationLock,1 ;check if the rotation is locked
 		JZ LeftRotKeyParsed
 
 		MOV SI, 0
@@ -1007,207 +896,13 @@ LeftDownKey:
 		JMP BreakParseInput
 LeftRightKey:
 		CMP AH, leftRightCode
-		JNZ RightRotKey
+		;JNZ RightRotKey
 		MOV SI, 0
 		CALL GetTempPiece
 
 		MOV SI,0
 		MOV BX,2
 		CALL MovePiece
-
-		JMP BreakParseInput
-RightRotKey:
-		CMP AH, rightRotCode
-		JNZ RightLeftKey
-
-		CMP rightPieceRotationLock,1 ;check if the rotation is locked
-		JZ BreakRotParseInput
-
-		MOV SI, 4
-		CALL GetTempPiece
-
-		MOV SI, 4
-		CALL RotatePiece
-BreakRotParseInput:
-		JMP BreakParseInput
-RightLeftKey:
-		CMP AH, rightLeftCode
-		JNZ RightDownKey
-		MOV SI, 4
-		CALL GetTempPiece
-
-		MOV SI, 4
-		MOV BX, 1
-		CALL MovePiece
-
-		JMP BreakParseInput
-RightDownKey:
-		CMP AH, rightDownCode
-		JNZ RightRightKey
-		MOV SI, 4
-		CALL GetTempPiece
-
-		MOV SI, 4
-		MOV BX, 0
-		CALL MovePiece
-
-		JMP BreakParseInput
-RightRightKey:
-		CMP AH, rightRightCode
-		JNZ LeftPowerup1
-		MOV SI, 4
-		CALL GetTempPiece
-		
-		MOV SI, 4
-		MOV BX, 2
-		CALL MovePiece
-		JMP BreakParseInput
-
-LeftPowerup1:
-		CMP AH, leftPower1
-		JNZ LeftPowerup2
-
-		MOV AH, leftPowerupFreezeCount
-		CMP AH, 0
-		JZ	BreakPowerup1
-
-		MOV SI, 0
-		CALL FreezeRotation
-		SUB leftPowerupFreezeCount, 1
-		CALL UpdatePowerupsScore
-
-BreakPowerup1:
-		JMP BreakParseInput
-
-LeftPowerup2:
-		CMP AH, leftPower2
-		JNZ LeftPowerup3
-
-		MOV AH, leftPowerupSpeedUpCount
-		CMP AH, 0
-		JZ	BreakPowerup2
-
-		MOV SI, 0
-		CALL SpeedUpOpponentPiece
-		SUB leftPowerupSpeedUpCount, 1
-		CALL UpdatePowerupsScore
-
-BreakPowerup2:
-		JMP BreakParseInput
-LeftPowerup3:
-		CMP AH, leftPower3
-		JNZ LeftPowerup4
-		
-		MOV AH, leftPowerupRemoveLinesCount
-		CMP AH, 0
-		JZ	BreakPowerup3
-
-		MOV SI, 0
-		CALL RemoveFourLines
-		SUB leftPowerupRemoveLinesCount, 1
-		CALL UpdatePowerupsScore
-BreakPowerup3:
-		JMP BreakParseInput
-LeftPowerup4:
-		CMP AH, LeftPower4
-		JNZ LeftPowerup5
-
-		MOV AH, leftPowerupChangePieceCount
-		CMP AH, 0
-		JZ	BreakPowerup4
-
-		MOV SI,0
-		CALL ChangePiece
-		SUB leftPowerupChangePieceCount,1
-		CALL UpdatePowerupsScore
-BreakPowerup4:
-		JMP BreakParseInput
-
-LeftPowerup5:
-		CMP AH, LeftPower5
-		JNZ RightPowerup1
-
-		MOV AH, leftPowerupInsertTwoLinesCount
-		CMP AH, 0
-		JZ	BreakPowerup5
-
-
-		MOV SI,0
-		CALL InsertTwoLines
-		SUB leftPowerupInsertTwoLinesCount,1
-		CALL UpdatePowerupsScore
-
-BreakPowerup5:
-		JMP BreakParseInput
-
-RightPowerup1:
-		CMP AH, RightPower1
-		JNZ RightPowerup2
-
-		MOV AH, rightPowerupFreezeCount
-		CMP AH, 0
-		JZ	BreakPowerup5
-
-		MOV SI, 4
-		CALL FreezeRotation
-		SUB rightPowerupFreezeCount, 1
-		CALL UpdatePowerupsScore
-
-		JMP BreakParseInput
-RightPowerup2:
-		CMP AH, RightPower2
-		JNZ RightPowerup3
-
-		MOV AH, rightPowerupSpeedUpCount
-		CMP AH, 0
-		JZ	BreakPowerup5
-
-		MOV SI, 4
-		CALL SpeedUpOpponentPiece
-		SUB rightPowerupSpeedUpCount, 1
-		CALL UpdatePowerupsScore
-
-		JMP BreakParseInput
-RightPowerup3:
-		CMP AH, RightPower3
-		JNZ RightPowerup4
-
-		MOV AH, rightPowerupRemoveLinesCount
-		CMP AH, 0
-		JZ	BreakPowerup5
-
-		MOV SI, 4
-		CALL RemoveFourLines
-		SUB rightPowerupRemoveLinesCount, 1
-		CALL UpdatePowerupsScore
-
-		JMP BreakParseInput
-RightPowerup4:
-		CMP AH, RightPower4
-		JNZ RightPowerup5
-
-		MOV AH, rightPowerupChangePieceCount
-		CMP AH, 0
-		JZ	BreakPowerup5
-
-		MOV SI,4
-		CALL ChangePiece
-		SUB rightPowerupChangePieceCount,1
-		CALL UpdatePowerupsScore
-
-		JMP BreakParseInput
-RightPowerup5:
-		CMP AH, RightPower5
-		JNZ BreakParseInput
-
-		MOV AH, rightPowerupInsertTwoLinesCount
-		CMP AH, 0
-		JZ	BreakParseInput
-
-		MOV SI,4
-		CALL InsertTwoLines
-		SUB rightPowerupInsertTwoLinesCount,1
-		CALL UpdatePowerupsScore
 
 		JMP BreakParseInput
 
@@ -1236,35 +931,10 @@ PieceGravity	PROC	NEAR
 				MOV CL,[DI]			;moves the piece number of steps equal to it's speed
 		MOVELEFT:		
 				CALL MovePiece
-				JZ COLL1
+				;JZ COLLff
 				LOOP MOVELEFT
-				JMP CHECK2
-		COLL1:	
-				MOV SI,0
-				CALL UnfreezeRotation
-				CALL ResetPieceSpeed	;if changed reset it to its original
-				CALL CheckLineClear		;check if a line has been cleared
-				CALL GenerateRandomPiece
-				
-		CHECK2:	MOV SI,4			
-				CALL GetTempPiece	;sets the TempPieceOffset with the address of the rightPiece
-				MOV AX,0			;Clearing AX before using it
-				MOV AX,tempPieceOffset	;gets the rightPiece's data offset
-				ADD AX,14H			;Access the speed of the right piece
-				MOV DI,AX			;DI=rightPieceSpeed
-				MOV CX,0			;Clears the CX before looping
-				MOV CL,[DI]			;moves the piece number of steps equal to it's speed
-		MOVERIGHT:		
-				CALL MovePiece
-				JZ	COLL2
-				LOOP MOVERIGHT
-				JMP NO_CHANGE
-		COLL2:	
-				MOV SI,4
-				CALL UnfreezeRotation
-				CALL ResetPieceSpeed	;if chnaged reset it to its original speed
-				CALL CheckLineClear		;check if a line has been cleared
-				CALL GenerateRandomPiece
+				;JMP CHECK2
+
 		NO_CHANGE:	
 				POPA
 				RET
@@ -1435,7 +1105,6 @@ GenerateRandomPiece		PROC 	NEAR
 						MOV BL,AH	;BL now contains the ID of the random piece
 						CALL CopyNextPieceData
 						CALL GetTempNextPiece
-						CALL DeleteNextPiece
 						CALL SetNextPieceData
 						CALL DrawNextPiece
 						CALL setCollisionPiece
@@ -1649,23 +1318,15 @@ CHECKLINESKIPINC:
 				CALL RemoveLine
 
 				;now we need to insert a line at the other player
-				MOV AX, SI
-				CMP SI, 0D
-				JNZ CHECKLINESIIS0			;if SI is 4, make it 0, if it's 0, make it 4
-				ADD Player1Score, DeltaScore		;increase score
-				CALL AddPowerupCheck
-				CALL UpdatePlayersScore
+				;MOV AX, SI
+				;CMP SI, 0D
+				;JNZ CHECKLINESIIS0			;if SI is 4, make it 0, if it's 0, make it 4
+				;ADD Player1Score, DeltaScore		;increase score
+				;CALL UpdatePlayerScore
 
-				MOV SI, 4D
-				JMP CHECKLINESIIS4
-CHECKLINESIIS0:
-				ADD Player2Score, DeltaScore		;increase score
-				CALL AddPowerupCheck
-				CALL UpdatePlayersScore
-				MOV SI, 0D
-CHECKLINESIIS4:
-				CALL InsertLine				;insert a line at the other player
-				MOV SI, AX					;reset the SI value back
+				;MOV SI, 4D
+				;JMP CHECKLINESIIS4
+
 CHECKLINESKIPRMV:
 				INC DX
 				CMP DX, FRAMEHEIGHT
@@ -1965,27 +1626,11 @@ DisplayMenu 	PROC     NEAR
 				MOV BL, 15 ;WHITE
 				CALL PrintMessage
 
-				MOV BP, OFFSET Player2 ; ES: BP POINTS TO THE TEXT
-				MOV CX, NameSz
-				MOV DH, 10 ;ROW TO PLACE STRING
-				MOV DL, 6 ; COLUMN TO PLACE STRING
-				MOV BL, 15 ;WHITE
-				CALL PrintMessage
-					
-				MOV BP, OFFSET Menu22 ; ES: BP POINTS TO THE TEXT
-				MOV CX, M22sz ;SIZE OF STRING
-				MOV DH, 10 ;ROW TO PLACE STRING
-				MOV DL, 12 ; COLUMN TO PLACE STRING
-				MOV BL, 15 ;WHITE
-				CALL PrintMessage
-
 				Wait4Ready: CALL Wait4Key
 							CMP AH,	F2Code
 							JE F2Pressed
-							CMP AH, F10Code
 							JNE WAIT4Ready
 							INC AH
-							MOV RPly2,AH
 					MOV DH, 11 ;ROW TO PLACE STRING
 					MOV DL, 6 ; COLUMN TO PLACE STRING
 					CALL MoveCursor
@@ -2008,7 +1653,6 @@ DisplayMenu 	PROC     NEAR
 					
 		CheckR:     CMP AH,5H ;Dummy number to check if ready
 					MOV AH, RPly1
-					AND AH, RPly2
 					JZ  Wait4Ready
 					RET		
 DisplayMenu      	ENDP
@@ -2088,22 +1732,11 @@ EndGameMenu		ENDP
 ChangeScoreToText	PROC	NEAR
 					PUSHA
 					MOV AH, 0
-					MOV AL,Player1Score
+					;MOV AL,Player1Score
 					MOV CL,10D
 					DIV CL
 					ADD AL,30H
 					LEA SI,LeftScoreText
-					MOV [SI],AL
-					INC SI
-					ADD AH,30H
-					MOV [SI],AH
-
-					MOV AH, 0
-					MOV AL,Player2Score
-					MOV CL,10D
-					DIV CL
-					ADD AL,30H
-					LEA SI,RightScoreText
 					MOV [SI],AL
 					INC SI
 					ADD AH,30H
@@ -2137,24 +1770,6 @@ DrawGUIText		PROC	NEAR
 				lea bp, UnderlineString
 				mov bx, 07h
 				int 10h
-
-				;notification bar
-				mov ah, 13h
-				mov cx, UnderlineStringLength
-				mov dh, 46
-				mov dl, 0
-				lea bp, UnderlineString
-				mov bx, 07h
-				int 10h
-
-				;notification text
-				mov ah, 13h
-				mov cx, PressEscToExitStringLength
-				mov dh, 47
-				mov dl, 0
-				lea bp, PressEscToExitString
-				mov bx, 07h
-				int 10h
 			
 
 				;render the left screen next piece text
@@ -2163,16 +1778,7 @@ DrawGUIText		PROC	NEAR
 				mov dh, LEFTNEXTPIECELOCY
 				mov dl, LEFTNEXTPIECELOCX
 				lea bp, NEXTPIECETEXT
-				mov bx, 4d
-				int 10h
-
-				;render the right screen next piece text
-				mov ah, 13h
-				mov cx, NEXTPIECETEXTLENGTH
-				mov dh, RIGHTNEXTPIECELOCY
-				mov dl, RIGHTNEXTPIECELOCX
-				lea bp, NEXTPIECETEXT
-				mov bx, 4d
+				mov bx, 11d
 				int 10h
 				
 				;render the left screen score text
@@ -2181,7 +1787,7 @@ DrawGUIText		PROC	NEAR
 				mov dh, LeftScoreLocY
 				mov dl, LeftScoreLocX
 				lea bp, SCORETEXT
-				mov bx, 4d
+				mov bx, 11d
 				int 10h
 				
 				;render the left screen score text
@@ -2190,26 +1796,10 @@ DrawGUIText		PROC	NEAR
 				mov dh, LeftPlyLocY
 				mov dl, LeftPlyLocX
 				lea bp, Player1
-				mov bx, 4d
-				int 10h
-				
-				mov ah, 13h
-				mov cx, NameSz
-				mov dh, RightPlyLocY
-				mov dl, RightPlyLocX
-				lea bp, Player2
-				mov bx, 4d
-				int 10h
-				
-				mov ah, 13h
-				mov cx, SCORETEXTLENGTH
-				mov dh, RightScoreLocY
-				mov dl, RightScoreLocX
-				lea bp, SCORETEXT
-				mov bx, 4d
+				mov bx, 11d
 				int 10h
 
-				CALL UpdatePlayersScore	;render the score itself
+				CALL UpdatePlayerScore	;render the score itself
 				
 				POPA
 				RET
@@ -2219,7 +1809,7 @@ DrawGUIText		ENDP
 ;it to strings, then draws them on the screen
 ;@param			none
 ;@return		none
-UpdatePlayersScore	PROC	NEAR
+UpdatePlayerScore	PROC	NEAR
 					PUSHA
 					CALL ChangeScoreToText
 
@@ -2228,29 +1818,14 @@ UpdatePlayersScore	PROC	NEAR
 					mov dh, LeftScoreStringLocY
 					mov dl, LeftScoreStringLocX
 					lea bp, LeftScoreText
-					mov bx, 4d
+					mov bx, 11d
 					int 10h
 
-					mov ah, 13h
-					mov cx, RightScoreTextLength
-					mov dh, RightScoreStringLocY
-					mov dl, RightScoreStringLocX
-					lea bp, RightScoreText
-					mov bx, 4d
-					int 10h
 					POPA
 					RET
-UpdatePlayersScore	ENDP
+UpdatePlayerScore	ENDP
 ;---------------------------------------------------
-;This procedure updates the score of the powerups for both players
-;@param				none
-;@return			none
-UpdatePowerupsScore	PROC	NEAR
-					PUSHA
 
-					POPA
-					RET
-UpdatePowerupsScore ENDP
 ;---------------------------------------------------
 ;this procedure takes a 2 decimal places integer variable and parses it into a string
 ;@param				AL: the integer variable
@@ -2342,242 +1917,7 @@ DRAWPIECEISBLACK1:
 					RET
 DrawNextPiece		ENDP
 ;---------------------------
-;This procedure clears the current temp piece (used in changing direction or rotation)	;NEEDS TESTING
-;@param			SI: screenId: 0 for left, 4 for right
-;@return		none
-DeleteNextPiece		PROC	NEAR
-					PUSHA
-					MOV BX, tempNextPieceOffset
-					MOV DI, BX						;Load the piece 4x4 string address in pieceData
-					ADD DI,	4						;Go to the string data to put in DI
-					MOV CX, 0D						;iterate over the 16 cells of the piece
-					;if the piece has color !black, draw it with black
-					;cell location is:
-					;cell_x = orig_x + id%4
-					;cell_y = orig_y + id/4
-LOPX1:			
-					MOV DL, [DI]					;copy the byte of color of current cell into DL
-					CMP DL, 0D						;check if color of current piece block is black
-					JZ 	ISBLACK1
-					
-					PUSH CX
-					
-					MOV AX, CX
-					MOV CL, 4D
-					DIV CL						;AH = id%4, AL = id/4
-					MOV CX, 0
-					MOV DX, 0
-					MOV CL, 13				;load selected piece X into CL
-					MOV DL, 2				;load selected piece Y into DL
-					ADD CL, AH					;CX = orig_x + id%4
-					ADD DL, AL					;DX = orig_y + id/4
-					
-					MOV AL, 0
 
-					CALL DrawBlockClr
-					
-					POP  CX
-ISBLACK1:		
-					INC CX
-					INC DI
-					CMP CX, 16D
-					JNZ LOPX1
-					POPA
-					RET
-DeleteNextPiece		ENDP
-;---------------------------
-;This procedure checks if a player should get a powerup now, if he should, then add a random powerup to him
-;@param				SI: 0 for player1, 4 for player2
-;@return			none
-AddPowerupCheck		PROC	NEAR
-					PUSHA
-					CMP SI, 0
-					JNZ PowerupSIis4
-					LEA DI, Player1Score	;load offset playerscore1 into bx
-					JMP PowerupBreak
-PowerupSIis4:
-					LEA DI, Player2Score	;load offset playerscore2 into bx
-PowerupBreak:
-					MOV AH, 0
-					MOV AL, [DI]
-					MOV CL, PowerupEveryPoint			;check if score is divisible by powerupPoints
-					DIV CL					;divide score by CL, check if it is divisible by it
-					CMP AH, 0
-					JNZ NoPowerUp
-					CMP AL, 0
-					JZ  NoPowerUp
-					MOV BX, 5				;number of powerups
-					CALL GenerateRandomNumber
-					;bl now has a random number from 0 to 4 inclusive
-					;MOV leftPowerupFreezeCount, BL
-					ADD DI, BX
-					INC DI					;moves DI to rand_number+1
-					MOV BL, 1
-					ADD [DI], BL			;increases the number of that powerup
-					CALL UpdatePowerupsScore
-
-					MOV AH, 2				;create beep sound
-					MOV DL, 7
-					INT 21H
-
-NoPowerUp:
-					POPA
-					RET
-AddPowerupCheck		ENDP
-;---------------------------
-;This procedure removes four lines from a given screen
-;@param			SI: screenId: 0 for left, 4 for right
-;@return		none
-RemoveFourLines		PROC	NEAR
-		PUSHA
-		
-		MOV CX,4									;number of lines to be removed
-		
-		;get the last row in the grid
-		MOV DX, FRAMEHEIGHT			
-		DEC DX
-
-		CALL GetTempPiece
-		CALL DeletePiece
-
-RemoveFourLinesLoop: 
-		CALL ShiftLinesDown												;go to next line
-		LOOP RemoveFourLinesLoop
-		
-		CALL DrawPiece
-
-		POPA
-		RET
-RemoveFourLines		ENDP
-;---------------------------
-;This procedure speeds up the block speed at the opponent
-;@param			SI: screenId of the calling player: 0 will affect the right screen, 4 will affect the left screen
-;@return		none
-SpeedUpOpponentPiece		PROC	NEAR
-		PUSHA
-		
-		CMP SI, 4							;if it is called by the right player
-		JZ SpeedUpLeftPlayer	;increase left player piece speed
-
-	SpeedUpRightPlayer:
-		MOV rightPieceSpeed, 2
-		POPA
-		RET	
-
-	SpeedUpLeftPlayer:
-		MOV leftPieceSpeed, 2
-		POPA
-		RET
-
-SpeedUpOpponentPiece		ENDP
-;---------------------------
-;This procedure reset the speed of the piece  to its original speed
-;@param			SI: screenId 0 for left, 4 for right
-;@return		none
-ResetPieceSpeed		PROC	NEAR
-		PUSHA
-		
-		CMP SI, 4						;check which screen to reset its piece speed
-		JZ ResetRightSpeed	
-
-	ResetLeftSpeed:
-		MOV CL, leftPieceSpeed
-		CMP CL,1
-		JZ BreakResetPieceSpeed
-		MOV leftPieceSpeed, 1	;set the piece speed to  1
-		JMP BreakResetPieceSpeed
-
-	ResetRightSpeed:
-		MOV CL, rightPieceSpeed
-		CMP CL,1
-		JZ BreakResetPieceSpeed
-		MOV rightPieceSpeed, 1	;set the piece speed to  1
-
-	BreakResetPieceSpeed:
-		POPA
-		RET
-
-ResetPieceSpeed		ENDP
-;---------------------------
-;This procedure freeze the rotation for the opponent
-;@param			SI: screenId of the calling player 0: will affect the right screen 4: will affect the left screen
-;@return		none
-FreezeRotation		PROC	NEAR
-		PUSHA
-		
-		CMP SI, 4						;if it is called by right screen freeze left piece
-		JZ FreezeRotationLeftPiece	
-
-	FreezeRotationRightPiece:
-		MOV rightPieceRotationLock, 1 ;set the piece speed to  1
-		POPA
-		RET
-
-	FreezeRotationLeftPiece:
-		MOV leftPieceRotationLock, 1	;set the piece speed to  1
-		POPA
-		RET
-
-FreezeRotation		ENDP
-;---------------------------
-;This procedure unfreeze the rotation for specific screen 
-;@param			SI: screenId 0: left 4: right
-;@return		none
-UnfreezeRotation		PROC	NEAR
-		PUSHA
-		
-		CMP SI, 4						;if it is called by right screen freeze left piece
-		JZ UnfreezeRightScreen	
-
-	UnfreezeLeftScreen:
-		MOV CL, leftPieceRotationLock	;get the lock variable
-		CMP CL, 0															
-		JZ BreakUnfreezeRotation			
-		MOV leftPieceRotationLock, 0	;reset lock variable to 0 if it wasn't
-		JMP BreakUnfreezeRotation
-
-	UnfreezeRightScreen:
-		MOV CL, rightPieceRotationLock	;get the lock variable
-		CMP CL, 0															
-		JZ BreakUnfreezeRotation			
-		MOV rightPieceRotationLock, 0	;reset lock variable to 0 if it wasn't
-		
-	BreakUnfreezeRotation:
-		POPA
-		RET
-
-UnfreezeRotation		ENDP
-;---------------------------
-;This procedure changes the current piece of the player
-;@param				SI: 0 for left player, 4 for right player
-;@return			none
-ChangePiece			PROC 	NEAR
-					PUSHA
-					CALL GetTempPiece
-					CALL DeletePiece
-					CALL GenerateRandomPiece
-					POPA
-					RET
-ChangePiece			ENDP
-;---------------------------
-;This procedure adds two lines at the opposite player
-;@param				SI: 0 for left player, 4 for right player
-;@return			none
-InsertTwoLines		PROC	NEAR
-					PUSHA
-					CMP SI, 0				;invert SI from 0 to 4 or from 4 to 0
-					JNZ	AddTwoLinesSIis4
-					MOV SI, 4
-					JMP AddTwoLinesBreak
-AddTwoLinesSIis4:
-					MOV SI, 0
-AddTwoLinesBreak:
-					CALL InsertLine			;insert two lines
-					CALL InsertLine
-
-					POPA
-					RET
-InsertTwoLines		ENDP
 ;---------------------------
 ; OpenFile 	PROC 	NEAR
 
@@ -2611,31 +1951,6 @@ InsertTwoLines		ENDP
 ;     LEA DX, LeftFrameBottomFilename
 ;     INT 21h
 ;     MOV [LeftFrameBottomFilehandle], AX
-
-; 	; MOV AH, 3Dh
-;     ; MOV AL, 0 ; read only
-;     ; LEA DX, rightFrameTopFilename
-;     ; INT 21h
-;     ; MOV [rightFrameTopFilehandle], AX
-
-; 	; MOV AH, 3Dh
-;     ; MOV AL, 0 ; read only
-;     ; LEA DX, rightFrameLeftFilename
-;     ; INT 21h
-;     ; MOV [rightFrameLeftFilehandle], AX
-
-; 	; MOV AH, 3Dh
-;     ; MOV AL, 0 ; read only
-;     ; LEA DX, rightFrameRightFilename
-;     ; INT 21h
-;     ; MOV [rightFrameRightFilehandle], AX
-
-; 	; MOV AH, 3Dh
-;     ; MOV AL, 0 ; read only
-;     ; LEA DX, rightFrameBottomFilename
-;     ; INT 21h
-;     ; MOV [rightFrameBottomFilehandle], AX
-   
    
 ;     RET
 ; OpenFile 	ENDP
@@ -2665,31 +1980,6 @@ InsertTwoLines		ENDP
 ;     LEA DX, leftFrameBottomData
 ;     INT 21h
 
-; 	; MOV AH,3Fh
-;     ; MOV BX, [rightFrameTopFilehandle]
-;     ; MOV CX, rightFrameTopWidth*rightFrameTopHeight ; number of bytes to read
-;     ; LEA DX, rightFrameTopData
-;     ; INT 21h
-
-;     ; MOV AH,3Fh
-;     ; MOV BX, [rightFrameLeftFilehandle]
-;     ; MOV CX, rightFrameLeftWidth*rightFrameLeftHeight ; number of bytes to read
-;     ; LEA DX, rightFrameLeftData
-;     ; INT 21h
-
-;     ; MOV AH,3Fh
-;     ; MOV BX, [rightFrameRightFilehandle]
-;     ; MOV CX, rightFrameRightWidth*rightFrameRightHeight ; number of bytes to read
-;     ; LEA DX, rightFrameRightData
-;     ; INT 21h
-
-;     ; MOV AH,3Fh
-;     ; MOV BX, [rightFrameBottomFilehandle]
-;     ; MOV CX, rightFrameBottomWidth*rightFrameBottomHeight ; number of bytes to read
-;     ; LEA DX, rightFrameBottomData
-;     ; INT 21h
-
-
 ;     RET
 ; ReadData	ENDP 
 ; ;---------------------------
@@ -2709,23 +1999,6 @@ InsertTwoLines		ENDP
 ; 	MOV AH, 3Eh
 ; 	MOV BX, [leftFrameBottomFilehandle]
 ; 	INT 21h
-
-; 	; MOV AH, 3Eh
-; 	; MOV BX, [rightFrameTopFilehandle]
-; 	; INT 21h
-
-; 	; MOV AH, 3Eh
-; 	; MOV BX, [rightFrameLeftFilehandle]
-; 	; INT 21h
-
-; 	; MOV AH, 3Eh
-; 	; MOV BX, [rightFrameRightFilehandle]
-; 	; INT 21h
-
-; 	; MOV AH, 3Eh
-; 	; MOV BX, [rightFrameBottomFilehandle]
-; 	; INT 21h
-
 
 ; 	RET
 ; CloseFile 	ENDP
@@ -2901,179 +2174,6 @@ DrawLeftBorder	PROC	NEAR
 				RET
 DrawLeftBorder	ENDP
 ;-------------------------
-DrawRightBorder	PROC	NEAR
 
-	;------------fire top-------------
-
-	;open file
-	MOV AH, 3Dh
-	MOV AL, 0 ; read only
-	LEA DX, RightFrameTopFilename
-	INT 21h
-	MOV [RightFrameTopFilehandle], AX
-
-	;read file
-	MOV AH,3Fh
-	MOV BX, [RightFrameTopFilehandle]
-	MOV CX, RightFrameTopWidth*RightFrameTopHeight ; number of bytes to read
-	LEA DX, WideFrameData
-	INT 21h
-
-	;close file
-	MOV AH, 3Eh
-	MOV BX, [RightFrameTopFilehandle]
-	INT 21h
-
-	;draw fire top
-	LEA BX, WideFrameData ; BL contains index at the current drawn pixel
-	MOV CX, RightFrameTopX
-	MOV DX, RightFrameTopY
-	MOV AH, 0ch
-	drawfireTop:
-		MOV AL,[BX]
-		INT 10h 
-		INC CX
-		INC BX
-		CMP CX, RightFrameTopWidth + RightFrameTopX
-	JNE drawfireTop 
-		
-		MOV CX , RightFrameTopX
-		INC DX
-		CMP DX, RightFrameTopHeight + RightFrameTopY
-	JNE drawfireTop
-
-	;CLEAR BUFFER
-
-	;CALL ClearWideBuffer
-
-	;------------fire bottom-------------
-
-	;open file
-	MOV AH, 3Dh
-	MOV AL, 0 ; read only
-	LEA DX, RightFrameBottomFilename
-	INT 21h
-	MOV [RightFrameBottomFilehandle], AX
-
-	;read file
-	MOV AH,3Fh
-	MOV BX, [RightFrameBottomFilehandle]
-	MOV CX, RightFrameBottomWidth*RightFrameBottomHeight ; number of bytes to read
-	LEA DX, WideFrameData
-	INT 21h
-
-	;close file
-	MOV AH, 3Eh
-	MOV BX, [RightFrameBottomFilehandle]
-	INT 21h
-
-	;drawing fire Bottom
-
-	LEA BX, WideFrameData ; BL contains index at the current drawn pixel
-	
-	MOV CX, RightFrameBottomX
-	MOV DX, RightFrameBottomY
-	MOV AH, 0ch
-
-	drawfireBottom:
-		MOV AL,[BX]
-		INT 10h 
-		INC CX
-		INC BX
-		CMP CX, RightFrameBottomWidth + RightFrameBottomX
-	JNE drawfireBottom 
-		MOV CX , RightFrameBottomX
-		INC DX
-		CMP DX, RightFrameBottomHeight + RightFrameBottomY
-	JNE drawfireBottom
-
-
-
-	;------------fire left-------------
-
-	;open file
-    MOV AH, 3Dh
-    MOV AL, 0 ; read only
-    LEA DX, RightFrameLeftFilename
-    INT 21h
-     
-    MOV [RightFrameLeftFilehandle], AX
-
-	;read file
-    MOV AH,3Fh
-    MOV BX, [RightFrameLeftFilehandle]
-    MOV CX, RightFrameLeftWidth*RightFrameLeftHeight ; number of bytes to read
-    LEA DX, TallFrameData
-    INT 21h
-
-	;close file
-	MOV AH, 3Eh
-	MOV BX, [RightFrameLeftFilehandle]
-	INT 21h
-
-	;drawing fire Left
-	LEA BX, TallFrameData ; BL contains index at the current drawn pixel
-	MOV CX, RightFrameLeftX
-	MOV DX, RightFrameLeftY
-	MOV AH, 0ch
-	
-
-	drawfireLeft:
-		MOV AL,[BX]
-		INT 10h 
-		INC CX
-		INC BX
-		CMP CX, RightFrameLeftWidth + RightFrameLeftX
-	JNE drawfireLeft 
-		
-		MOV CX , RightFrameLeftX
-		INC DX
-		CMP DX, RightFrameLeftHeight + RightFrameLeftY
-	JNE drawfireLeft
-	
-	;------------fire right-------------
-
-	;open file
-	MOV AH, 3Dh
-	MOV AL, 0 ; read only
-	LEA DX, RightFrameRightFilename
-	INT 21h
-	MOV [RightFrameRightFilehandle], AX
-
-	;read file
-	MOV AH,3Fh
-	MOV BX, [RightFrameRightFilehandle]
-	MOV CX, RightFrameRightWidth*RightFrameRightHeight ; number of bytes to read
-	LEA DX, TallFrameData
-	INT 21h
-
-	;close file
-	MOV AH, 3Eh
-	MOV BX, [RightFrameRightFilehandle]
-	INT 21h
-	
-	;drawing fire Right
-	LEA BX, TallFrameData	 ; BL contains index at the current drawn pixel
-	MOV CX, RightFrameRightX
-	MOV DX, RightFrameRightY
-	MOV AH, 0ch
-
-	drawfireRight:
-		MOV AL,[BX]
-		INT 10h 
-		INC CX
-		INC BX
-		CMP CX, RightFrameRightWidth + RightFrameRightX
-	JNE drawfireRight 
-		
-		MOV CX , RightFrameRightX
-		INC DX
-		CMP DX, RightFrameRightHeight + RightFrameRightY
-	JNE drawfireRight
-
-	;------------done-------------
-	
-				RET
-DrawRightBorder	ENDP
 ;-------------------------
 END     MAIN

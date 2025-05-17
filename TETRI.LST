@@ -1,0 +1,5897 @@
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-1
+
+
+				;x86 asm Tetris
+				;Microprocessors Project
+				;--------------------------- 
+				INCLUDE macros.inc
+			     C	pusha MACRO
+			     C	   push ax
+			     C	   push cx
+			     C	   push dx
+			     C	   push bx
+			     C	   push sp
+			     C	   push bp
+			     C	   push si
+			     C	   push di
+			     C	ENDM pusha
+			     C	
+			     C	popa MACRO
+			     C	   pop di
+			     C	   pop si
+			     C	   pop bp
+			     C	   pop sp
+			     C	   pop bx
+			     C	   pop dx
+			     C	   pop cx
+			     C	   pop ax
+			     C	ENDM popa
+				.MODEL HUGE 
+				.STACK 512
+				.DATA
+				;INSERT DATA HERE
+				
+				;--------External-------
+ = 00DB				LeftFrameTopWidth EQU  219
+ = 0036				LeftFrameTopHeight EQU 54
+ 0000  69 63 65 74 6F 70	LeftFrameTopFilename DB 'icetop.bin', 0
+       2E 62 69 6E 00		
+ = 005A				LeftFrameTopX		 EQU 90
+ = 0000				LeftFrameTopY		 EQU 0
+ 000B  0000			LeftFrameTopFilehandle DW ?
+				
+ = 0033				LeftFrameLeftWidth EQU  51
+ = 01AA				LeftFrameLeftHeight EQU 426
+ 000D  69 63 65 6C 65 66	LeftFrameLeftFilename DB 'iceleft.bin', 0
+       74 2E 62 69 6E 00	
+ = 0033				LeftFrameLeftX		 EQU 51
+ = 0036				LeftFrameLeftY		 EQU 54
+ 0019  0000			LeftFrameLeftFilehandle DW ?
+				
+ = 002B				LeftFrameRightWidth EQU  43
+ = 01AA				LeftFrameRightHeight EQU 426
+ 001B  69 63 65 72 69 67	LeftFrameRightFilename DB 'iceright.bin', 0
+       68 74 2E 62 69 6E	
+       00			
+ = 0129				LeftFrameRightX		 EQU 297
+ = 0036				LeftFrameRightY		 EQU 54
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-2
+
+
+ 0028  0000			LeftFrameRightFilehandle DW ?
+				
+ = 00C5				LeftFrameBottomWidth EQU  197
+ = 0036				LeftFrameBottomHeight EQU 54
+ 002A  69 63 65 62 6F 74	LeftFrameBottomFilename DB 'icebot.bin', 0
+       2E 62 69 6E 00		
+ = 0065				LeftFrameBottomX		 EQU 101
+ = 01C3				LeftFrameBottomY		 EQU 451
+ 0035  0000			LeftFrameBottomFilehandle DW ?
+				
+ = 00F8				RightFrameTopWidth EQU  248
+ = 0035				RightFrameTopHeight EQU 53
+ 0037  66 69 72 65 74 6F	RightFrameTopFilename DB 'firetop.bin', 0
+       70 2E 62 69 6E 00	
+ = 0240				RightFrameTopX		 EQU 576
+ = 0001				RightFrameTopY		 EQU 1
+ 0043  0000			RightFrameTopFilehandle DW ?
+				
+ = 0029				RightFrameLeftWidth EQU  41
+ = 01CA				RightFrameLeftHeight EQU 458
+ 0045  66 69 72 65 6C 65	RightFrameLeftFilename DB 'fireleft.bin', 0
+       66 74 2E 62 69 6E	
+       00			
+ = 0231				RightFrameLeftX		 EQU 561
+ = 0036				RightFrameLeftY		 EQU 54
+ 0052  0000			RightFrameLeftFilehandle DW ?
+				
+ = 0031				RightFrameRightWidth EQU  49
+ = 01CD				RightFrameRightHeight EQU 461
+ 0054  66 69 72 65 72 2E	RightFrameRightFilename DB 'firer.bin', 0
+       62 69 6E 00		
+ = 031D				RightFrameRightX		 EQU 797
+ = 0036				RightFrameRightY		 EQU 54
+ 005E  0000			RightFrameRightFilehandle DW ?
+				
+ = 00C7				RightFrameBottomWidth EQU  199
+ = 003F				RightFrameBottomHeight EQU 63
+ 0060  66 69 72 65 62 6F	RightFrameBottomFilename DB 'firebot.bin', 0
+       74 2E 62 69 6E 00	
+ = 0256				RightFrameBottomX		 EQU 598
+ = 01C4				RightFrameBottomY		 EQU 452
+ 006C  0000			RightFrameBottomFilehandle DW ?
+				
+ = 00FA				WideFrameWIDTH	EQU	250
+ = 003C				WideFrameHEIGHT EQU	60
+ 006E  3A98[			WideFrameData	DB	WideFrameHEIGHT*WideFra
+				meWIDTH DUP(0)
+	   00			
+			 ]	
+				
+				
+ = 003C				TallFrameWIDTH	EQU	60
+ = 01D1				TallFrameHEIGHT EQU	465
+ 3B06  6CFC[			TallFrameData	DB	TallFrameHEIGHT*TallFra
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-3
+
+
+				meWIDTH DUP(0)
+	   00			
+			 ]	
+				
+				
+				;; Main screen logo data
+				
+ = 0129				LogoWidth 			EQU 297D
+ = 00C8				LogoHeight 			EQU 200D
+				
+ = 00AA				LogostX				EQU 170D
+ = 001E				LogostY				EQU 30D
+ = 01D3				LogofnX				EQU LogostX + L
+				ogoWidth
+ = 00E6				LogofnY				EQU LogostY + L
+				ogoHeight	
+				
+ A802  4C 6F 67 6F 2E 62	Logofilename 		DB 'Logo.bin', 0
+       69 6E 00			
+ A80B  0000			LogoFilehandle 		DW ?
+ A80D  0000			positionInLogoFile 	DW 0	
+ A80F  00			LogoData			DB  0
+				
+				;--------Powerups-------
+				
+ = 0004				PowerupEveryPoint			
+					EQU 4
+				
+ A810  00			Player1Score				
+					DB 0			;score of first
+				 player
+ A811  00			leftPowerupFreezeCount			DB 0
+ A812  00			leftPowerupSpeedUpCount			DB 0
+ A813  00			leftPowerupRemoveLinesCount		DB 0
+ A814  00			leftPowerupChangePieceCount		DB 0
+ A815  00			leftPowerupInsertTwoLinesCount	DB 0
+ A816  00			leftPieceRotationLock 			DB 0 
+					;lock the rotation of the piece 0:locke
+				d 1:free
+				
+ A817  00			Player2Score				
+					DB 0
+ A818  00			rightPowerupFreezeCount			DB 0
+ A819  00			rightPowerupSpeedUpCount		DB 0
+ A81A  00			rightPowerupRemoveLinesCount	DB 0
+ A81B  00			rightPowerupChangePieceCount	DB 0
+ A81C  00			rightPowerupInsertTwoLinesCount	DB 0
+ A81D  00			rightPieceRotationLock			DB 0
+					;lock the rotation of the piece 0:locke
+				d 1:free
+				
+				
+				;--------GameData-------
+				
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-4
+
+
+ = 000A				FRAMEWIDTH        	EQU  10      ;width of 
+				each frame in blocks
+ = 0014				FRAMEHEIGHT       	EQU  20     ;height of 
+				each frame in blocks
+				
+ = 00C8				GAMESCRWIDTH        EQU  FRAMEWIDTH * BLOCKSIZE
+				     ;width of each screen in pixels
+ = 0190				GAMESCRHEIGHT       EQU  FRAMEHEIGHT * BLOCKSIZ
+				E     ;height of each screen in pixels
+				
+ = 0014				BLOCKSIZE			EQU 20	
+					;size of block is BLOCKSIZE x BLOCKSIZE
+				 pixels
+				
+									
+							;Tetris grid is 20X10, 
+				so each block is 20X20 pixels
+ A81E  0064			GAMELEFTSCRX        DW  100     ;top left corne
+				r X of left screen
+ A820  0036			GAMELEFTSCRY        DW  54      ;top left corne
+				r Y of left screen
+ A822  0258			GAMERIGHTSCRX       DW  600     ;top left corne
+				r X of right screen
+ A824  0036			GAMERIGHTSCRY       DW  54      ;top left corne
+				r Y of right screen
+				
+				
+ = 0032				FRAMETEXTOFFSET		EQU 50
+				
+ = 0001				DeltaScore			EQU 1	
+					;amount of score a player gains by clea
+				ring a line
+				
+				;; Position of player names 
+				
+ = 004D				RightPlyLocX		EQU RightScoreLocX-10
+ =				RightPlyLocY		EQU RightScoreLocY
+ = 000D				LeftPlyLocX			EQU LeftScoreLo
+				cX-10
+ =				LeftPlyLocY			EQU LeftScoreLo
+				cY
+				
+				;------Pieces Data------
+				
+				;; Constant pieces data
+				
+ A826  00 00 00 00 0B 0B	firstPiece 				
+					DB 0,0,0,0,11,11,11,11,0,0,0,0,0,0,0,0
+					;Line shape
+       0B 0B 00 00 00 00	
+       00 00 00 00		
+ A836  00 0B 00 00 00 0B	firstPiece1				
+					DB 0,11,0,0,0,11,0,0,0,11,0,0,0,11,0,0
+					;Line shape after one rotation
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-5
+
+
+       00 00 00 0B 00 00	
+       00 0B 00 00		
+ A846  00 00 00 00 0B 0B	firstPiece2				
+					DB 0,0,0,0,11,11,11,11,0,0,0,0,0,0,0,0
+					;Line shape after two rotations
+       0B 0B 00 00 00 00	
+       00 00 00 00		
+ A856  00 0B 00 00 00 0B	firstPiece3				
+					DB 0,11,0,0,0,11,0,0,0,11,0,0,0,11,0,0
+					;Line shape after Three rotations
+       00 00 00 0B 00 00	
+       00 0B 00 00		
+				
+ A866  01 00 00 00 01 01	secondPiece				
+					DB 1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0
+					;J shape
+       01 00 00 00 00 00	
+       00 00 00 00		
+ A876  00 01 01 00 00 01	secondPiece1				DB 0,1,
+				1,0,0,1,0,0,0,1,0,0,0,0,0,0	;J shape after 
+				one rotation
+       00 00 00 01 00 00	
+       00 00 00 00		
+ A886  00 00 00 00 01 01	secondPiece2				DB 0,0,
+				0,0,1,1,1,0,0,0,1,0,0,0,0,0	;J shape after 
+				two rotations
+       01 00 00 00 01 00	
+       00 00 00 00		
+ A896  00 01 00 00 00 01	secondPiece3				DB 0,1,
+				0,0,0,1,0,0,1,1,0,0,0,0,0,0	;J shape after 
+				three rotations
+       00 00 01 01 00 00	
+       00 00 00 00		
+				
+ A8A6  00 00 00 00 06 06	thirdPiece 				
+					DB 0,0,0,0,6,6,6,0,6,0,0,0,0,0,0,0
+					;L shape 
+       06 00 06 00 00 00	
+       00 00 00 00		
+ A8B6  06 06 00 00 00 06	thirdPiece1				
+					DB 6,6,0,0,0,6,0,0,0,6,0,0,0,0,0,0
+					;L shape after one rotation
+       00 00 00 06 00 00	
+       00 00 00 00		
+ A8C6  00 00 06 00 06 06	thirdPiece2				
+					DB 0,0,6,0,6,6,6,0,0,0,0,0,0,0,0,0
+					;L shape after two rotations
+       06 00 00 00 00 00	
+       00 00 00 00		
+ A8D6  00 06 00 00 00 06	thirdPiece3				
+					DB 0,6,0,0,0,6,0,0,0,6,6,0,0,0,0,0
+					;L shape after three rotations
+       00 00 00 06 06 00	
+       00 00 00 00		
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-6
+
+
+				
+ A8E6  00 0E 0E 00 00 0E	fourthPiece 				DB 0,14
+				,14,0,0,14,14,0,0,0,0,0,0,0,0,0	;square
+       0E 00 00 00 00 00	
+       00 00 00 00		
+ A8F6  00 0E 0E 00 00 0E	fourthPiece1				DB 0,14
+				,14,0,0,14,14,0,0,0,0,0,0,0,0,0	;square after o
+				ne rotation
+       0E 00 00 00 00 00	
+       00 00 00 00		
+ A906  00 0E 0E 00 00 0E	fourthPiece2				DB 0,14
+				,14,0,0,14,14,0,0,0,0,0,0,0,0,0	;square after t
+				wo rotations
+       0E 00 00 00 00 00	
+       00 00 00 00		
+ A916  00 0E 0E 00 00 0E	fourthPiece3				DB 0,14
+				,14,0,0,14,14,0,0,0,0,0,0,0,0,0	;square after t
+				hree rotation
+       0E 00 00 00 00 00	
+       00 00 00 00		
+				
+ A926  00 00 00 00 00 02	fifthPiece				
+					DB 0,0,0,0,0,2,2,0,2,2,0,0,0,0,0,0
+					;S shape
+       02 00 02 02 00 00	
+       00 00 00 00		
+ A936  00 02 00 00 00 02	fifthPiece1				
+					DB 0,2,0,0,0,2,2,0,0,0,2,0,0,0,0,0
+					;S shape after one rotation
+       02 00 00 00 02 00	
+       00 00 00 00		
+ A946  00 00 00 00 00 02	fifthPiece2				
+					DB 0,0,0,0,0,2,2,0,2,2,0,0,0,0,0,0
+					;S shape after two rotations
+       02 00 02 02 00 00	
+       00 00 00 00		
+ A956  00 02 00 00 00 02	fifthPiece3				
+					DB 0,2,0,0,0,2,2,0,0,0,2,0,0,0,0,0
+					;S shape after three rotations
+       02 00 00 00 02 00	
+       00 00 00 00		
+				
+ A966  00 00 00 00 05 05	sixthPiece				
+					DB 0,0,0,0,5,5,5,0,0,5,0,0,0,0,0,0
+					;T shape
+       05 00 00 05 00 00	
+       00 00 00 00		
+ A976  00 05 00 00 05 05	sixthPiece1				
+					DB 0,5,0,0,5,5,0,0,0,5,0,0,0,0,0,0
+					;T shape after one rotation
+       00 00 00 05 00 00	
+       00 00 00 00		
+ A986  00 05 00 00 05 05	sixthPiece2				
+					DB 0,5,0,0,5,5,5,0,0,0,0,0,0,0,0,0
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-7
+
+
+					;T shape after two rotations
+       05 00 00 00 00 00	
+       00 00 00 00		
+ A996  00 05 00 00 00 05	sixthPiece3				
+					DB 0,5,0,0,0,5,5,0,0,5,0,0,0,0,0,0
+					;T shape after three rotations
+       05 00 00 05 00 00	
+       00 00 00 00		
+				
+ A9A6  00 00 00 00 04 04	seventhPiece 				DB 0,0,
+				0,0,4,4,0,0,0,4,4,0,0,0,0,0	;Z shape
+       00 00 00 04 04 00	
+       00 00 00 00		
+ A9B6  00 00 04 00 00 04	seventhPiece1				DB 0,0,
+				4,0,0,4,4,0,0,4,0,0,0,0,0,0	;Z shape after 
+				one rotation
+       04 00 00 04 00 00	
+       00 00 00 00		
+ A9C6  00 00 00 00 04 04	seventhPiece2				DB 0,0,
+				0,0,4,4,0,0,0,4,4,0,0,0,0,0	;Z shape after 
+				two rotations
+       00 00 00 04 04 00	
+       00 00 00 00		
+ A9D6  00 00 04 00 00 04	seventhPiece3				DB 0,0,
+				4,0,0,4,4,0,0,4,0,0,0,0,0,0	;Z shape after 
+				three rotation
+       04 00 00 04 00 00	
+       00 00 00 00		
+				
+				;;PLayer pieces data 
+				
+ A9E6  00			leftPieceId				
+					DB	?			;contai
+				ns the ID of the current piece
+ A9E7  00			leftPieceOrientation		DB	?
+							;contains the current o
+				rientation of the piece
+ A9E8  00			leftPieceLocX				DB
+					?			;the Xcoord of 
+				the top left corner
+ A9E9  00			leftPieceLocY				DB
+					?			;the Ycoord of 
+				the top left corner
+ A9EA  0010[			leftPieceData				DB
+					16 DUP(?)	;contains the 4x4 matri
+				x of the piece (after orientation)
+	   ??			
+			 ]	
+				
+ A9FA  01			leftPieceSpeed				DB
+					1			;contains the f
+				alling speed of the left piece
+				
+ A9FB  00			rightPieceId				DB
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-8
+
+
+					?			;contains the I
+				D of the current piece
+ A9FC  00			rightPieceOrientation		DB	?
+							;contains the current o
+				rientation of the piece
+ A9FD  00			rightPieceLocX				DB
+					?			;the Xcoord of 
+				the top left corner
+ A9FE  00			rightPieceLocY				DB
+					?			;the Ycoord of 
+				the top left corner
+ A9FF  0010[			rightPieceData				DB
+					16 DUP(?)	;contains the 4x4 matri
+				x of the piece (after orientation)
+	   ??			
+			 ]	
+				
+ AA0F  01			rightPieceSpeed				DB
+					1			;contains the f
+				alling speed of the right piece
+				
+ AA10  0000			tempPieceOffset				DW
+					?			;contains the a
+				ddress of the current piece
+				
+				;;Coliision piece info
+				
+ AA12  00			collisionPieceId			
+					DB	?			;contai
+				ns the ID of the current piece
+ AA13  00			collisionPieceOrientation		DB
+					?			;contains the c
+				urrent orientation of the piece
+ AA14  00			collisionPieceLocX			
+					DB	?			;the Xc
+				oord of the top left corner
+ AA15  00			collisionPieceLocY			
+					DB	?			;the Yc
+				oord of the top left corner
+ AA16  0010[			collisionPieceData			
+					DB	16 DUP(?)	;contains the 4
+				x4 matrix of the piece (after orientation)
+	   ??			
+			 ]	
+				
+ AA26  01			collisionPieceSpeed			
+					DB	1			;contai
+				ns the falling speed of the left piece
+				
+				;;Next piece info
+				
+ AA27  00			nextLeftPieceId				
+					DB	?			;contai
+				ns the ID of the current piece
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-9
+
+
+ AA28  00			nextLeftPieceOrientation		DB
+					?			;contains the n
+				ext orientation of the piece
+ AA29  00			nextLeftPieceLocX			
+					DB	?			;the Xc
+				oord of the top left corner
+ AA2A  00			nextLeftPieceLocY			
+					DB	?			;the Yc
+				oord of the top left corner
+ AA2B  0010[			nextLeftPieceData			
+					DB	16 DUP(?)	;contains the 4
+				x4 matrix of the piece (after orientation)
+	   ??			
+			 ]	
+				
+				
+ AA3B  00			nextRightPieceId			
+					DB	?			;contai
+				ns the ID of the current piece
+ AA3C  00			nextRightPieceOrientation		DB
+					?			;contains the c
+				urrent orientation of the piece
+ AA3D  00			nextRightPieceLocX			
+					DB	?			;the Xc
+				oord of the top left corner
+ AA3E  00			nextRightPieceLocY			
+					DB	?			;the Yc
+				oord of the top left corner
+ AA3F  0010[			nextRightPieceData			
+					DB	16 DUP(?)	;contains the 4
+				x4 matrix of the piece (after orientation)
+	   ??			
+			 ]	
+				
+				
+ AA4F  0000			tempNextPieceOffset			
+					DW	?			;contai
+				ns the address of the next piece
+				
+				;--------Controls-------
+				
+				;Controls for left screen
+ AA51  1F			leftDownCode			DB	1Fh
+						;S key
+ AA52  1E			leftLeftCode			DB	1Eh
+						;A key
+ AA53  20			leftRightCode			DB	20h
+						;D key
+ AA54  11			leftRotCode				DB
+					11h		;W key
+ AA55  02			leftPower1				DB  02h
+						;1 key
+ AA56  03			leftPower2				DB  03h
+						;2 key
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-10
+
+
+ AA57  04			leftPower3				DB  04h
+						;3 key
+ AA58  05			leftPower4				DB  05h
+						;4 key
+ AA59  06			leftPower5				DB  06h
+						;5 key
+				
+				;Controls for right screen
+ AA5A  50			rightDownCode			DB	50h
+						;downArrow key
+ AA5B  4B			rightLeftCode			DB	4Bh 
+					;leftArrow key
+ AA5C  4D			rightRightCode			DB	4Dh
+						;rightArrow key
+ AA5D  48			rightRotCode			DB	48h 
+					;upArrow key
+ AA5E  31			rightPower1				DB
+					31h		;N key
+ AA5F  32			rightPower2				DB
+					32h		;M key
+ AA60  33			rightPower3				DB
+					33h 	;, key
+ AA61  34			rightPower4				DB
+					34h		;. key
+ AA62  35			rightPower5				DB
+					35h		;/ key
+				
+				;General ScanCodes
+ AA63  1C			EnterCode  DB 1CH
+ AA64  3B			F1Code     DB 3BH
+ AA65  3C			F2Code     DB 3CH
+ AA66  44			F10Code    DB 44H 
+ AA67  01			EscCode	   DB 01H
+				
+				;--------Strings--------
+				
+				;; Next and Score Strings
+				
+ = 0004				NEXTPIECETEXTLENGTH EQU 4
+ AA68  4E 65 78 74		NEXTPIECETEXT		DB	"Next"
+ = 002D				LEFTNEXTPIECELOCX	EQU 45
+ = 0004				LEFTNEXTPIECELOCY	EQU 4
+ = 006C				RIGHTNEXTPIECELOCX	EQU 108
+ = 0004				RIGHTNEXTPIECELOCY	EQU 4
+				
+ = 0006				SCORETEXTLENGTH		EQU 6
+ AA6C  53 63 6F 72 65 3A	SCORETEXT			DB	"Score:
+				"
+ = 0017				LeftScoreLocX		EQU 23
+ = 0021				LeftScoreLocY		EQU 33
+ = 0057				RightScoreLocX		EQU 87
+ = 0021				RightScoreLocY		EQU 33
+				
+ = 0002				LeftScoreTextLength EQU 2
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-11
+
+
+ AA72  30 30			LeftScoreText		DB "00"
+ = 001E				LeftScoreStringLocX	EQU LeftScoreLocX+7
+ =				LeftScoreStringLocY	EQU LeftScoreLocY
+				
+ = 0002				RightScoreTextLength 	EQU 2
+ AA74  30 30			RightScoreText			DB "00"
+ = 005E				RightScoreStringLocX	EQU RightScoreLocX+7
+ =				RightScoreStringLocY	EQU RightScoreLocY
+				
+				;; Aux screen strings
+				
+ = 0080				UnderlineStringLength 	EQU 128
+ AA76  5F 5F 5F 5F 5F 5F	UnderlineString			DB	"______
+				_______________________________________________
+				_______________________________________________
+				____________________________"
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F 5F 5F 5F 5F	
+       5F 5F			
+				
+ = 0018				PressEscToExitStringLength 	EQU 24
+ AAF6  50 72 65 73 73 20	PressEscToExitString 		DB "Press ESC K
+				ey to exit..."
+       45 53 43 20 4B 65	
+       79 20 74 6F 20 65	
+       78 69 74 2E 2E 2E	
+				
+				;; Main screen strings
+				
+ AB0E  50 6C 65 61 73 65	Menu11 	DB "Please enter your name:"
+       20 65 6E 74 65 72	
+       20 79 6F 75 72 20	
+       6E 61 6D 65 3A		
+ = 0017				M11sz	EQU 23
+ AB25  50 72 65 73 73 20	Menu12 	DB "Press Enter Key to Continue"
+       45 6E 74 65 72 20	
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-12
+
+
+       4B 65 79 20 74 6F	
+       20 43 6F 6E 74 69	
+       6E 75 65			
+ = 001B				M12sz	EQU 27
+ AB40  2C 20 50 72 65 73	Menu21 	DB ", Press F2 to play"
+       73 20 46 32 20 74	
+       6F 20 70 6C 61 79	
+ = 0012				M21sz	EQU 18
+ AB52  2C 20 50 72 65 73	Menu22 	DB ", Press F10 to play"
+       73 20 46 31 30 20	
+       74 6F 20 70 6C 61	
+       79			
+ = 0013				M22sz	EQU 19 
+				
+ AB65  2A 54 6F 20 70 6C	Logo2     DB "*To play tetris press F2"
+       61 79 20 74 65 74	
+       72 69 73 20 70 72	
+       65 73 73 20 46 32	
+ = 0018				L2sz   	  EQU 24
+ AB7D  2A 54 6F 20 65 6E	Logo3     DB "*To end the program press Esc"
+       64 20 74 68 65 20	
+       70 72 6F 67 72 61	
+       6D 20 70 72 65 73	
+       73 20 45 73 63		
+ = 001D				L3sz   	  EQU 29
+ AB9A  2A 54 6F 20 6D 61	Logo4	  DB "*To main menu press Enter"
+       69 6E 20 6D 65 6E	
+       75 20 70 72 65 73	
+       73 20 45 6E 74 65	
+       72			
+ = 0019				L4sz	  EQU 25	
+				
+ ABB3  47 61 6D 65 20 65	GameEnded1	DB "Game ended"
+       6E 64 65 64		
+ = 000A				GE1sz		EQU 10
+ = 0035				GE1X 		EQU 53
+ = 0020				GE1Y		EQU 32
+						
+ ABBD  54 6F 20 63 6F 6E	GameEnded2 	DB "To continue press any key"
+       74 69 6E 75 65 20	
+       70 72 65 73 73 20	
+       61 6E 79 20 6B 65	
+       79			
+ = 0019				GE2sz		EQU 25
+ = 002F				GE2X 		EQU 47
+ = 0022				GE2Y		EQU 34
+				
+ ABD6  52			Ready  DB 'R'
+ ABD7  00			RPly1  DB  0
+ ABD8  00			RPly2  DB  0
+				
+ ABD9  20			SPACE 		DB ' '
+ ABDA  0F			NAME1		DB 15
+ ABDB  00			Ply1Sz		DB ?
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-13
+
+
+ ABDC  000A[			Player1		DB 10 DUP(' ')
+	   20			
+			 ]	
+				
+ ABE6  0F			NAME2 		DB 15
+ ABE7  00			Ply2Sz		DB ?
+ ABE8  000A[			Player2		DB 10 DUP(' ')
+	   20			
+			 ]	
+				
+ = 0006				NameSz		EQU 6
+				
+				;-------General vars-------
+ ABF2  63			Seconds					
+					DB 99			;Contains the p
+				revious second value
+ ABF3  01			GameFlag				
+					DB 1			;Status of the 
+				game
+ = 0008				GRAYBLOCKCLR				EQU
+					 8		;color of gray solid bl
+				ocks
+				;---------------------------
+				.CODE         
+ 0000				MAIN    PROC    FAR
+ 0000  B8 ---- R				MOV AX, @DATA   ;SETUP DATA ADD
+				RESS
+ 0003  8E D8					MOV DS, AX      ;MOV DATA ADDRE
+				SS TO DS
+ 0005  8E C0					MOV ES, AX
+						
+ 0007  E8 0A7B R				CALL GetName
+ 000A				NewGame:
+ 000A  E8 0053 R				CALL InitializeNewGame
+ 000D  E8 0AF0 R				CALL DisplayMenu 
+				;----------------------------------------------
+				-
+ 0010  B8 4F02					mov     AX, 4F02H
+ 0013  BB 0105			        mov     BX, 0105H
+ 0016  CD 10			        INT     10H
+				
+ 0018  E8 00C3 R				CALL DrawGameScr
+ 001B  E8 0C3F R				CALL DrawGUIText
+				
+ 001E  BE 0000					MOV SI,0
+ 0021  BB 0000					MOV BX,0
+ 0024  E8 0253 R				CALL GetTempNextPiece
+ 0027  E8 01F6 R				CALL SetNextPieceData
+ 002A  E8 07DC R				CALL GenerateRandomPiece
+				
+ 002D  BE 0004					MOV SI,4
+ 0030  BB 0000					MOV BX,0
+ 0033  E8 0253 R				CALL GetTempNextPiece
+ 0036  E8 01F6 R				CALL SetNextPieceData
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-14
+
+
+ 0039  E8 07DC R				CALL GenerateRandomPiece
+				
+ 003C				GAMELP:	
+ 003C  E8 0455 R				CALL ParseInput
+ 003F  E8 0675 R				CALL PieceGravity
+ 0042  A0 ABF3 R				MOV AL,GameFlag
+ 0045  3C 01					CMP AL,1
+ 0047  75 02					JNZ Finished
+ 0049  EB F1					JMP GAMELP
+				
+ 004B				Finished:
+ 004B  E8 0B8A R				CALL GameEnded
+ 004E  E8 0BBE R				CALL EndGameMenu
+ 0051  EB B7					JMP NewGame
+						
+ 0053				MAIN    ENDP
+				;---------------------------
+ 0053				InitializeNewGame 	PROC	NEAR
+ 0053  C6 06 AA0F R 01							MOV rig
+				htPieceSpeed , 1			;contai
+				ns the falling speed of the right piece
+ 0058  C6 06 A817 R 00							MOV Pla
+				yer2Score , 0
+ 005D  C6 06 A818 R 00							MOV rig
+				htPowerupFreezeCount	, 0
+ 0062  C6 06 A819 R 00							MOV rig
+				htPowerupSpeedUpCount , 0
+ 0067  C6 06 A81A R 00							MOV rig
+				htPowerupRemoveLinesCount , 0
+ 006C  C6 06 A81B R 00							MOV rig
+				htPowerupChangePieceCount , 0
+ 0071  C6 06 A81C R 00							MOV
+					rightPowerupInsertTwoLinesCount	, 0
+ 0076  C6 06 A81D R 00							MOV
+					rightPieceRotationLock ,0
+									
+ 007B  C6 06 A9FA R 01							MOV lef
+				tPieceSpeed , 1			;contains the f
+				alling speed of the left piece
+ 0080  C6 06 A810 R 00							MOV Pla
+				yer1Score, 0			;score of first
+				 player
+ 0085  C6 06 A811 R 00							MOV lef
+				tPowerupFreezeCount	,  0
+ 008A  C6 06 A812 R 00							MOV lef
+				tPowerupSpeedUpCount	,  0
+ 008F  C6 06 A813 R 00							MOV lef
+				tPowerupRemoveLinesCount	,0
+ 0094  C6 06 A814 R 00							MOV lef
+				tPowerupChangePieceCount	, 	0
+ 0099  C6 06 A815 R 00							MOV lef
+				tPowerupInsertTwoLinesCount	,	0
+ 009E  C6 06 A816 R 00							MOV lef
+				tPieceRotationLock ,0
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-15
+
+
+									
+ 00A3  C6 06 ABD7 R 00							MOV RPl
+				y1,0
+ 00A8  C6 06 ABD8 R 00							MOV Rpl
+				y2,0
+									
+ 00AD  C6 06 AA26 R 01							MOV col
+				lisionPieceSpeed	, 1
+									
+ 00B2  C7 06 A80D R 0000						MOV Pos
+				itionInLogoFile,0
+ 00B8  C6 06 ABF2 R 63							MOV Sec
+				onds,99		
+ 00BD  C6 06 ABF3 R 01							MOV Gam
+				eFlag, 1
+ 00C2  C3								RET
+ 00C3				InitializeNewGame 	ENDP
+				;---------------------------
+				;This PROC draws the screens of the two players
+				 given the parameters in data segment
+				;@param     none
+				;@return    none
+ 00C3				DrawGameScr PROC    NEAR
+ 00C3  BE 0000				MOV SI, 0			
+					;0 for left, 4 for right
+ 00C6  B0 09				MOV AL, 9               ;frame color
+ 00C8  B4 0C				MOV AH, 0CH             ;draw pixel com
+				mand
+ 00CA				DRAWFRAME:
+ 00CA  8B 8C A81E R			MOV CX, GAMELEFTSCRX[SI]    ;beginning 
+				of top left X
+ 00CE  8B 94 A820 R			MOV DX, GAMELEFTSCRY[SI]   	;beginn
+				ing of top left Y
+ 00D2  81 C2 0190			ADD DX, GAMESCRHEIGHT	  	;go to 
+				bottom
+					;INC DX				
+						;draw at bottom + 1 as this is 
+				the border
+ 00D6  8B 9C A81E R			MOV BX, GAMELEFTSCRX[SI]
+ 00DA  81 C3 00C8			ADD BX, GAMESCRWIDTH    ;set right limi
+				t
+				
+ 00DE				DRAWHOR:
+ 00DE  CD 10				INT 10H                 ;draw bottom
+				
+				
+ 00E0  41				INC CX                  ;inc X
+ 00E1  3B CB				CMP CX, BX              ;check if colum
+				n is at limit
+ 00E3  76 F9				JBE DRAWHOR             ;if yes, exit l
+				oop
+					
+ 00E5  8B 8C A81E R			MOV CX, GAMELEFTSCRX+[SI]    ;beginning
+				 of top left X
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-16
+
+
+ 00E9  49				DEC CX				
+						 ;go to left - 1
+ 00EA  8B 94 A820 R			MOV DX, GAMELEFTSCRY+[SI]    ;beginning
+				 of top left Y
+					
+ 00EE  8B 9C A820 R			MOV BX, GAMELEFTSCRY+[SI]
+ 00F2  81 C3 0190			ADD BX, GAMESCRHEIGHT   	 ;set b
+				ottom limit
+					
+ 00F6				DRAWVER:
+					
+ 00F6  CD 10				INT 10H                 ;draw left
+				
+				
+ 00F8  81 C1 00C8			ADD CX, GAMESCRWIDTH    ;go to right
+ 00FC  83 C1 01				ADD CX, 1			
+					;draw at right + 1
+ 00FF  CD 10				INT 10H               ;draw right
+ 0101  81 E9 00C8			SUB CX, GAMESCRWIDTH    ;go back to lef
+				t	
+ 0105  83 E9 01				SUB CX, 1
+				
+					
+				
+ 0108  42				INC DX                  ;inc Y
+ 0109  3B D3				CMP DX, BX              ;check if row i
+				s at limit
+ 010B  76 E9				JBE DRAWVER
+ 010D  83 C6 04				ADD SI, 4			
+					;inc SI
+ 0110  B0 04				MOV AL, 4			
+					;set color to red for right frame
+ 0112  83 FE 08				CMP SI, 8			
+					;check if loop ran twice
+ 0115  75 B3				JNE	DRAWFRAME
+				
+ 0117  E8 0F98 R			CALL DrawLeftBorder
+ 011A  E8 10AF R			CALL DrawRightBorder
+ 011D  C3				RET
+ 011E				DrawGameScr ENDP
+				;---------------------------
+				
+				;---------------------------
+				;This PROC draws the pixels surrounding the fra
+				me of the two players given the parameters in d
+				ata segment
+				;@param     none
+				;@return    none
+ 011E				drawPixelsFrame PROC    NEAR
+ 011E  BE 0000				MOV SI, 0			
+					;0 for left, 4 for right
+ 0121  B0 08				MOV AL, 8               ;frame color
+ 0123  B4 0C				MOV AH, 0CH             ;draw pixel com
+				mand
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-17
+
+
+				
+ 0125				drawPixelsFrameLoop:
+ 0125  8B 8C A81E R			MOV CX, GAMELEFTSCRX[SI]    ;beginning 
+				of top left X
+ 0129  8B 94 A820 R			MOV DX, GAMELEFTSCRY[SI]   	;beginn
+				ing of top left Y
+ 012D  81 C2 0190			ADD DX, GAMESCRHEIGHT	  	;go to 
+				bottom
+					;INC DX				
+						;draw at bottom + 1 as this is 
+				the border
+ 0131  8B 9C A81E R			MOV BX, GAMELEFTSCRX[SI]
+ 0135  81 C3 00C8			ADD BX, GAMESCRWIDTH    ;set right limi
+				t
+					
+ 0139  83 C1 05				ADD CX,5D
+ 013C  83 C2 05				ADD DX,5D
+				
+ 013F				DRAWPIXELHOR:
+ 013F  CD 10				INT 10H                 ;draw bottom
+ 0141  83 C1 0A				ADD CX,10D               ;inc X
+ 0144  3B CB				CMP CX, BX              ;check if colum
+				n is at limit
+ 0146  76 F7				JBE DRAWPIXELHOR             ;if yes, e
+				xit loop
+					
+				
+ 0148  8B 8C A81E R			MOV CX, GAMELEFTSCRX+[SI]    ;beginning
+				 of top left X
+ 014C  49				DEC CX				
+						 ;go to left - 1
+ 014D  8B 94 A820 R			MOV DX, GAMELEFTSCRY+[SI]    ;beginning
+				 of top left Y
+					
+ 0151  8B 9C A820 R			MOV BX, GAMELEFTSCRY+[SI]
+ 0155  81 C3 0190			ADD BX, GAMESCRHEIGHT   	 ;set b
+				ottom limit
+					
+ 0159  83 E9 05				SUB CX, 5D
+ 015C  83 C2 05				ADD DX, 5D
+				
+ 015F				DRAWPIXELVER:
+ 015F  CD 10				INT 10H                 ;draw left
+				
+ 0161  81 C1 00C8			ADD CX, GAMESCRWIDTH    ;go to right
+ 0165  83 C1 0A				ADD CX, 10D			
+					;draw at right + 1
+ 0168  CD 10				INT 10H               ;draw right
+ 016A  81 E9 00C8			SUB CX, GAMESCRWIDTH    ;go back to lef
+				t	
+ 016E  83 E9 0A				SUB CX, 10D
+				
+					
+				
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-18
+
+
+ 0171  83 C2 0A				ADD DX,10D                  ;inc Y
+ 0174  3B D3				CMP DX, BX              ;check if row i
+				s at limit
+ 0176  76 E7				JBE DRAWPIXELVER
+				
+ 0178  83 C6 04				ADD SI, 4			
+					;inc SI
+ 017B  83 FE 08				CMP SI, 8			
+					;check if loop ran twice
+ 017E  75 A5				JNE	drawPixelsFrameLoop
+				
+ 0180  C3				RET
+ 0181				drawPixelsFrame ENDP
+				;---------------------------------
+				;Takes a block (X,Y) in the N*M grid of tetris 
+				and returns the color of the block
+				;@param		CX: X coord,
+				;		    DX: Y coord, 
+				;			SI: screen ID: 0 for le
+				ft, 4 for right
+				;@return	AL:	color for (X,Y) grid
+ 0181				GetBlockClr	PROC	NEAR		
+									;XXXXXX
+				XXX - NEEDS TESTING
+ 0181  51				PUSH CX
+ 0182  52				PUSH DX
+ 0183  53				PUSH BX
+ 0184  56				PUSH SI
+ 0185  8B C1				MOV AX, CX		;top left of (X
+				,Y) block is BLOCKSIZE*X + gridTopX
+ 0187  B3 14				MOV BL, BLOCKSIZE	
+ 0189  F6 E3				MUL BL
+ 018B  05 0005				ADD AX, 5D
+ 018E  03 84 A81E R			ADD AX, GAMELEFTSCRX[SI]
+ 0192  8B C8				MOV	CX, AX		;CX = BLOCKSIZE
+				*Xcoord + gridTopX + 5
+					
+ 0194  8B C2				MOV AX, DX		;same as above
+ 0196  F6 E3				MUL BL
+ 0198  05 0005				ADD AX, 5D
+ 019B  03 84 A820 R			ADD AX, GAMELEFTSCRY[SI]
+ 019F  8B D0				MOV DX, AX
+					
+ 01A1  B4 0D				MOV AH, 0DH
+ 01A3  53				PUSH BX
+ 01A4  B7 00				MOV BH, 0
+ 01A6  CD 10				INT 10H
+ 01A8  5B				POP BX
+				
+ 01A9  5E				POP SI
+ 01AA  5B				POP BX
+ 01AB  5A				POP DX
+ 01AC  59				POP CX
+ 01AD  C3				RET
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-19
+
+
+ 01AE				GetBlockClr	ENDP
+				;---------------------------
+				;Takes a block (X,Y) in the N*M grid of tetris 
+				and colors the block with a given color
+				;@param		CX:	X coord,
+				;			DX: Y coord,
+				;			SI: screen ID: 0 for le
+				ft, 4 for right
+				;			AL: color for (X,Y) gri
+				d
+				;@return	none
+ 01AE				DrawBlockClr	PROC	NEAR
+					PUSHA
+ 01AE  50                    1	   push ax 
+ 01AF  51                    1	   push cx 
+ 01B0  52                    1	   push dx 
+ 01B1  53                    1	   push bx 
+ 01B2  54                    1	   push sp 
+ 01B3  55                    1	   push bp 
+ 01B4  56                    1	   push si 
+ 01B5  57                    1	   push di 
+ 01B6  8B F8				MOV DI, AX		;push color to 
+				DI
+									;go to 
+				top left of block
+ 01B8  8B C1				MOV	AX, CX
+ 01BA  B3 14				MOV BL, BLOCKSIZE
+ 01BC  F6 E3				MUL BL
+ 01BE  03 84 A81E R			ADD AX, GAMELEFTSCRX[SI]
+ 01C2  8B C8				MOV CX, AX		;CX = BLOCKSIZE
+				*Xcoord + gridTopX
+					
+ 01C4  8B C2				MOV AX, DX
+ 01C6  F6 E3				MUL BL
+ 01C8  03 84 A820 R			ADD AX, GAMELEFTSCRY[SI]
+ 01CC  8B D0				MOV DX, AX		;DX = BLOCKSIZE
+				*Ycoord + gridTopY
+					
+ 01CE  8B C7				MOV AX, DI		;pop color to A
+				X
+					
+ 01D0  8B F9				MOV DI, CX		;DI = limit of 
+				CX
+ 01D2  83 C7 14				ADD DI, BLOCKSIZE		;DI = C
+				X + BLOCKSIZE (LIMIT OF CX)
+ 01D5  8B DA				MOV BX, DX		;BX = limit of 
+				DX
+ 01D7  83 C3 14				ADD	BX, BLOCKSIZE		;BX = D
+				X + BLOCKSIZE (LIMIT OF DX)
+				
+ 01DA  B4 0C				MOV AH, 0CH
+ 01DC				LOOPX:
+ 01DC  8B D3				MOV DX, BX		;Reset DX to or
+				iginal Y
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-20
+
+
+ 01DE  83 EA 14				SUB DX, BLOCKSIZE
+ 01E1				LOOPY:
+ 01E1  CD 10				INT 10H			;draw pixel at 
+				(CX,DX)
+ 01E3  42				INC DX			;go to next pix
+				el Y
+ 01E4  3B D3				CMP DX, BX		
+ 01E6  75 F9				JNZ LOOPY
+ 01E8  41				INC CX
+ 01E9  3B CF				CMP CX, DI
+ 01EB  75 EF				JNZ LOOPX
+					
+					POPA
+ 01ED  5F                    1	   pop di 
+ 01EE  5E                    1	   pop si 
+ 01EF  5D                    1	   pop bp 
+ 01F0  5C                    1	   pop sp 
+ 01F1  5B                    1	   pop bx 
+ 01F2  5A                    1	   pop dx 
+ 01F3  59                    1	   pop cx 
+ 01F4  58                    1	   pop ax 
+ 01F5  C3				RET
+ 01F6				DrawBlockClr	ENDP
+				;---------------------------
+				;This procedure sets the next piece data for le
+				ft or right screen according to tempNextPieceOf
+				fset
+				;@param			BX: Piece ID	
+						
+				;@return		none
+ 01F6				SetNextPieceData	PROC	NEAR
+						PUSHA
+ 01F6  50                    1	   push ax 
+ 01F7  51                    1	   push cx 
+ 01F8  52                    1	   push dx 
+ 01F9  53                    1	   push bx 
+ 01FA  54                    1	   push sp 
+ 01FB  55                    1	   push bp 
+ 01FC  56                    1	   push si 
+ 01FD  57                    1	   push di 
+ 01FE  8B 3E AA4F R				MOV DI,	tempNextPieceOffset
+ 0202  BE 0000					MOV SI, 0d		
+					;initialize counter	
+ 0205  89 1D					MOV [DI], BX		;move i
+				d of selected piece to selectedScreenPiece
+ 0207  B4 00					MOV AH, 0
+ 0209  88 65 01					MOV [DI+1], AH		;set or
+				ientation to 0
+ 020C  B4 00					MOV AH, 0D
+ 020E  88 65 03					MOV [DI+3], AH		;set pi
+				eceY to 0
+ 0211  B4 04					MOV AH, 04D		
+					;set pieceX to 4
+ 0213  88 65 02					MOV [DI+2], AH
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-21
+
+
+						
+ 0216  83 C7 04					ADD DI, 4d		
+					;jump to piece data
+ 0219  8B C3					MOV AX, BX
+ 021B  BB 0040					MOV BX, 64d		
+					
+ 021E  F7 E3					MUL BX
+ 0220  8B D8					MOV BX, AX
+ 0222				SETSCRPIECELOP:	
+ 0222  8A 88 A826 R				MOV CL, firstPiece[BX][SI]
+ 0226  88 0D					MOV [DI], CL
+ 0228  47					INC DI
+ 0229  46					INC SI
+ 022A  83 FE 10					CMP SI, 16d
+ 022D  75 F3					JNZ SETSCRPIECELOP
+						POPA
+ 022F  5F                    1	   pop di 
+ 0230  5E                    1	   pop si 
+ 0231  5D                    1	   pop bp 
+ 0232  5C                    1	   pop sp 
+ 0233  5B                    1	   pop bx 
+ 0234  5A                    1	   pop dx 
+ 0235  59                    1	   pop cx 
+ 0236  58                    1	   pop ax 
+ 0237  C3					RET
+ 0238				SetNextPieceData	ENDP
+				;---------------------------
+				;This procedure copies the piece address into t
+				empPiece according to SI
+				;@param			SI: screenId: 0 for lef
+				t, 4 for right
+				;@return		none 
+ 0238				GetTempPiece	PROC	NEAR
+ 0238  56					PUSH SI
+ 0239  83 FE 00					CMP SI, 0		
+							;If the screen is left
+ 023C  75 0B					JNZ	RIGHT
+ 023E  8D 36 A9E6 R				LEA SI, leftPieceId	
+						;copy the leftPieceOffset to SI
+ 0242  89 36 AA10 R				MOV tempPieceOffset, SI	
+					;load the leftPieceOffset to tempPieceO
+				ffset
+ 0246  EB 09 90					JMP EXT
+ 0249				RIGHT:					
+									;else i
+				f the screen is right
+ 0249  8D 36 A9FB R				LEA SI, rightPieceId	
+					;copy the rightPieceOffset to SI
+ 024D  89 36 AA10 R				MOV tempPieceOffset, SI	
+					;load the rightPieceOffset to tempPiece
+				Offset
+ 0251  5E			EXT:	POP SI
+ 0252  C3					RET
+ 0253				GetTempPiece	ENDP
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-22
+
+
+				;---------------------------
+				;This procedure copies the next piece address i
+				nto tempNextPiece according to SI
+				;@param			SI: screenId: 0 for lef
+				t, 4 for right
+				;@return		none 
+ 0253				GetTempNextPiece	PROC	NEAR
+ 0253  56					PUSH SI
+ 0254  83 FE 00					CMP SI, 0		
+							;If the screen is left
+ 0257  75 0B					JNZ	RIGHT1
+ 0259  8D 36 AA27 R				LEA SI, nextLeftPieceId	
+						;copy the leftPieceOffset to SI
+ 025D  89 36 AA4F R				MOV tempNextPieceOffset, SI
+						;load the leftPieceOffset to te
+				mpPieceOffset
+ 0261  EB 09 90					JMP EXT1
+ 0264				RIGHT1:					
+									;else i
+				f the screen is right
+ 0264  8D 36 AA3B R				LEA SI, nextRightPieceId
+						;copy the rightPieceOffset to S
+				I
+ 0268  89 36 AA4F R				MOV tempNextPieceOffset, SI
+						;load the rightPieceOffset to t
+				empPieceOffset
+ 026C  5E			EXT1:	POP SI
+ 026D  C3					RET
+ 026E				GetTempNextPiece	ENDP
+				;---------------------------
+				;This procedure clears the current temp piece (
+				used in changing direction or rotation)	;NEEDS 
+				TESTING
+				;@param			SI: screenId: 0 for lef
+				t, 4 for right
+				;@return		none
+ 026E				DeletePiece		PROC	NEAR
+						PUSHA
+ 026E  50                    1	   push ax 
+ 026F  51                    1	   push cx 
+ 0270  52                    1	   push dx 
+ 0271  53                    1	   push bx 
+ 0272  54                    1	   push sp 
+ 0273  55                    1	   push bp 
+ 0274  56                    1	   push si 
+ 0275  57                    1	   push di 
+ 0276  8B 1E AA10 R				MOV BX, tempPieceOffset
+ 027A  8B FB					MOV DI, BX		
+								;Load the piece
+				 4x4 string address in pieceData
+ 027C  83 C7 04					ADD DI,	4		
+								;Go to the stri
+				ng data to put in DI
+ 027F  B9 0000					MOV CX, 0D		
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-23
+
+
+								;iterate over t
+				he 16 cells of the piece
+						;if the piece has color !black,
+				 draw it with black
+						;cell location is:
+						;cell_x = orig_x + id%4
+						;cell_y = orig_y + id/4
+ 0282				LOPX:			
+ 0282  8A 15					MOV DL, [DI]		
+							;copy the byte of color
+				 of current cell into DL
+ 0284  80 FA 00					CMP DL, 0D		
+								;check if color
+				 of current piece block is black
+ 0287  74 1D					JZ 	ISBLACK
+						
+ 0289  51					PUSH CX
+						
+ 028A  8B C1					MOV AX, CX
+ 028C  B1 04					MOV CL, 4D
+ 028E  F6 F1					DIV CL			
+							;AH = id%4, AL = id/4
+ 0290  B9 0000					MOV CX, 0
+ 0293  BA 0000					MOV DX, 0
+ 0296  8A 4F 02					MOV CL, [BX+2]		
+						;load selected piece X into CL
+ 0299  8A 57 03					MOV DL, [BX+3]		
+						;load selected piece Y into DL
+ 029C  02 CC					ADD CL, AH		
+							;CX = orig_x + id%4
+ 029E  02 D0					ADD DL, AL		
+							;DX = orig_y + id/4
+						
+ 02A0  B0 00					MOV AL, 0
+				
+ 02A2  E8 01AE R				CALL DrawBlockClr
+						
+ 02A5  59					POP  CX
+ 02A6				ISBLACK:		
+ 02A6  41					INC CX
+ 02A7  47					INC DI
+ 02A8  83 F9 10					CMP CX, 16D
+ 02AB  75 D5					JNZ LOPX
+						POPA
+ 02AD  5F                    1	   pop di 
+ 02AE  5E                    1	   pop si 
+ 02AF  5D                    1	   pop bp 
+ 02B0  5C                    1	   pop sp 
+ 02B1  5B                    1	   pop bx 
+ 02B2  5A                    1	   pop dx 
+ 02B3  59                    1	   pop cx 
+ 02B4  58                    1	   pop ax 
+ 02B5  C3					RET
+ 02B6				DeletePiece		ENDP
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-24
+
+
+				;---------------------------
+				;This procedure draws the piece stored in temp 
+				piece
+				;in it's corresponding Data,(X,Y)
+				;@param			SI: screenId: 0 for lef
+				t, 4 for right
+				;@return		none
+ 02B6				DrawPiece		PROC	NEAR
+						PUSHA
+ 02B6  50                    1	   push ax 
+ 02B7  51                    1	   push cx 
+ 02B8  52                    1	   push dx 
+ 02B9  53                    1	   push bx 
+ 02BA  54                    1	   push sp 
+ 02BB  55                    1	   push bp 
+ 02BC  56                    1	   push si 
+ 02BD  57                    1	   push di 
+ 02BE  8B 1E AA10 R				MOV BX, tempPieceOffset
+ 02C2  8B FB					MOV DI, BX		
+								;Load the piece
+				 4x4 string address in pieceData
+ 02C4  83 C7 04					ADD DI,	4		
+								;Go to the stri
+				ng data to put in DI
+ 02C7  B9 0000					MOV CX, 0D		
+								;iterate over t
+				he 16 cells of the piece
+						;if the piece has color !black,
+				 draw it with it's color
+						;cell location is:
+						;cell_x = orig_x + id%4
+						;cell_y = orig_y + id/4
+ 02CA				DRAWPIECELOPX:			
+ 02CA  8A 15					MOV DL, [DI]		
+							;copy the byte of color
+				 of current cell into DL
+ 02CC  80 FA 00					CMP DL, 0D		
+								;check if color
+				 of current piece block is black
+ 02CF  74 1D					JZ	 DRAWPIECEISBLACK
+						
+ 02D1  51					PUSH CX
+						
+ 02D2  8B C1					MOV AX, CX
+ 02D4  B1 04					MOV CL, 4D
+ 02D6  F6 F1					DIV CL			
+							;AH = id%4, AL = id/4
+ 02D8  B9 0000					MOV CX, 0
+ 02DB  BA 0000					MOV DX, 0
+ 02DE  8A 4F 02					MOV CL, [BX+2]		
+						;load selected piece X into CL
+ 02E1  8A 57 03					MOV DL, [BX+3]		
+						;load selected piece Y into DL
+ 02E4  02 CC					ADD CL, AH		
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-25
+
+
+							;CX = orig_x + id%4
+ 02E6  02 D0					ADD DL, AL		
+							;DX = orig_y + id/4
+						
+ 02E8  8A 05					MOV AL, [DI]
+				
+ 02EA  E8 01AE R				CALL DrawBlockClr
+						
+ 02ED  59					POP  CX
+ 02EE				DRAWPIECEISBLACK:		
+ 02EE  47					INC DI
+ 02EF  41					INC CX
+ 02F0  83 F9 10					CMP CX, 16D
+ 02F3  75 D5					JNZ DRAWPIECELOPX
+				
+				
+						POPA
+ 02F5  5F                    1	   pop di 
+ 02F6  5E                    1	   pop si 
+ 02F7  5D                    1	   pop bp 
+ 02F8  5C                    1	   pop sp 
+ 02F9  5B                    1	   pop bx 
+ 02FA  5A                    1	   pop dx 
+ 02FB  59                    1	   pop cx 
+ 02FC  58                    1	   pop ax 
+ 02FD  C3					RET
+ 02FE				DrawPiece		ENDP
+				;---------------------------
+				;This procedure takes the direction to move the
+				 piece in and re-draws it in the new location
+					;NOT FINISHED
+				;@param			
+				;				BX: direction{0
+				:down, 1:left, 2:right}
+				;				SI: screenId: 0
+				 for left, 4 for right
+				;@return		NONE
+ 02FE				MovePiece		PROC	NEAR
+						PUSHA
+ 02FE  50                    1	   push ax 
+ 02FF  51                    1	   push cx 
+ 0300  52                    1	   push dx 
+ 0301  53                    1	   push bx 
+ 0302  54                    1	   push sp 
+ 0303  55                    1	   push bp 
+ 0304  56                    1	   push si 
+ 0305  57                    1	   push di 
+ 0306  53					PUSH BX
+				
+						;PUT TEMP PIECE IN MEMORY
+ 0307  E8 0238 R				CALL GetTempPiece
+				
+ 030A  E8 026E R				CALL DeletePiece
+				
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-26
+
+
+						;INSERT COLLISION DETECTION HER
+				E
+ 030D  E8 06F5 R				CALL setCollisionPiece	
+					;Set the offset of the collision piece 
+				from temp piece
+				
+ 0310  83 FB 00					CMP BX, 0D		
+							;check for direction of
+				 movement
+ 0313  74 0A					JZ DOWNDTEMP
+ 0315  83 FB 01					CMP BX, 1D
+ 0318  74 0E					JZ LEFTDTEMP
+ 031A  83 FB 02					CMP BX, 2D
+ 031D  74 12					JZ RIGHTDTEMP
+ 031F				DOWNDTEMP:				
+									;move c
+				ollision piece downward
+ 031F  BB AA12 R				MOV BX, offset collisionPieceId
+ 0322  FE 47 03					INC BYTE PTR [BX+3]
+ 0325  EB 10 90					JMP COLLPIECEBRK
+ 0328				LEFTDTEMP:				
+									;move c
+				ollision piece left 
+ 0328  BB AA12 R				MOV BX, offset collisionPieceId
+ 032B  FE 4F 02					DEC BYTE PTR [BX+2]
+ 032E  EB 07 90					JMP COLLPIECEBRK
+ 0331				RIGHTDTEMP:				
+									;move c
+				ollision piece right
+ 0331  BB AA12 R				MOV BX, offset collisionPieceId
+ 0334  FE 47 02					INC BYTE PTR [BX+2]	
+					
+ 0337				COLLPIECEBRK:
+ 0337  E8 07C8 R				CALL CheckCollision	
+								;check if colli
+				sionPiece collides
+									
+									
+					;AH will be 1 if it collides, 0 if not
+						;CALL DrawPiece
+ 033A  5B					POP BX
+ 033B  3C 01					CMP AL, 1
+ 033D  9C					PUSHF			
+									;Saves 
+				the flags to determine if the piece moved or st
+				ayed in place
+ 033E  74 2A					JZ	BREAKMOVEPIECE	
+								;If the piece c
+				ollides, break the procedure and leave
+				
+						;DELETE THE PIECE FROM THE SCRE
+				EN
+						;CALL DeletePiece
+						;INSERT MOVING LOGIC HERE
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-27
+
+
+					
+ 0340  83 FB 00					CMP BX, 0D
+ 0343  74 0A					JZ DOWND
+ 0345  83 FB 01					CMP BX, 1D
+ 0348  74 0F					JZ LEFTD
+ 034A  83 FB 02					CMP BX, 2D
+ 034D  74 14					JZ RIGHTD
+ 034F				DOWND:			
+ 034F  8B 1E AA10 R				MOV BX, tempPieceOffset
+ 0353  FE 47 03					INC BYTE PTR [BX+3]
+ 0356  EB 12 90					JMP MOVPIECEBRK
+ 0359				LEFTD:
+ 0359  8B 1E AA10 R				MOV BX, tempPieceOffset
+ 035D  FE 4F 02					DEC BYTE PTR [BX+2]
+ 0360  EB 08 90					JMP MOVPIECEBRK
+ 0363				RIGHTD:
+ 0363  8B 1E AA10 R				MOV BX, tempPieceOffset
+ 0367  FE 47 02					INC BYTE PTR [BX+2]
+ 036A				MOVPIECEBRK:	;DRAW THE NEW PIECE IN NEW LOCA
+				TION
+				
+ 036A				BREAKMOVEPIECE:
+ 036A  E8 02B6 R				CALL DrawPiece
+ 036D  9D					POPF
+						POPA
+ 036E  5F                    1	   pop di 
+ 036F  5E                    1	   pop si 
+ 0370  5D                    1	   pop bp 
+ 0371  5C                    1	   pop sp 
+ 0372  5B                    1	   pop bx 
+ 0373  5A                    1	   pop dx 
+ 0374  59                    1	   pop cx 
+ 0375  58                    1	   pop ax 
+ 0376  C3					RET
+ 0377				MovePiece		ENDP
+				;---------------------------
+				;This procedure rotates the current piece that'
+				s pointed to by the tempPieceOffset by 90 degre
+				e from the previous rotation
+				;@param			SI: screenId: 0 for lef
+				t, 4 for right
+				;@return		none
+ 0377				RotatePiece		PROC NEAR
+								PUSHA
+ 0377  50                    1	   push ax 
+ 0378  51                    1	   push cx 
+ 0379  52                    1	   push dx 
+ 037A  53                    1	   push bx 
+ 037B  54                    1	   push sp 
+ 037C  55                    1	   push bp 
+ 037D  56                    1	   push si 
+ 037E  57                    1	   push di 
+ 037F  E8 026E R						CALL DeletePiec
+				e
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-28
+
+
+ 0382  E8 0238 R						CALL GetTempPie
+				ce
+ 0385  8B 1E AA10 R						MOV BX,tempPiec
+				eOffset		;Loads the address of the curre
+				nt piece
+ 0389  8D 3E A826 R						LEA DI,firstPie
+				ce
+								
+ 038D  8A 07							MOV AL,[BX]
+									;Checks
+				 ID of the current piece and stores the offset 
+				of the original piece's Data in DI
+ 038F  3C 00							CMP AL,0
+ 0391  74 26							JZ	ORIEN
+ 0393  83 C7 40							ADD DI,40H
+ 0396  3C 01							CMP AL,1
+ 0398  74 1F							JZ ORIEN
+ 039A  83 C7 40							ADD DI,40H
+ 039D  3C 02							CMP AL,2
+ 039F  74 18							JZ ORIEN
+ 03A1  83 C7 40							ADD DI,40H
+ 03A4  3C 03							CMP AL,3
+ 03A6  74 11							JZ ORIEN
+ 03A8  83 C7 40							ADD DI,40H
+ 03AB  3C 04							CMP AL,4
+ 03AD  74 0A							JZ ORIEN
+ 03AF  83 C7 40							ADD DI,40H
+ 03B2  3C 05							CMP AL,5
+ 03B4  74 03							JZ ORIEN
+ 03B6  83 C7 40							ADD DI,40H
+					
+				
+ 03B9				ORIEN:					
+									;Checks
+				 the current piece orientation to determine whi
+				ch orientation of the piece to choose
+ 03B9  43							INC BX	
+ 03BA  8A 07							MOV AL,[BX]
+ 03BC  3C 00							CMP AL,0
+ 03BE  74 0C							JZ ROTATE90
+ 03C0  3C 01							CMP AL,1
+ 03C2  74 28							JZ ROTATE180
+ 03C4  3C 02							CMP AL,2
+ 03C6  74 44							JZ ROTATE270
+ 03C8  3C 03							CMP AL,3
+ 03CA  74 60							JZ ROTATE360
+								
+						
+				
+ 03CC				ROTATE90:		;Checks for collision b
+				efore rotating the piece	
+ 03CC  B9 0010							MOV CX,10H
+ 03CF  E8 0842 R						CALL RotationCo
+				llision
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-29
+
+
+ 03D2  74 75							JZ BREAK
+								;Piece is clear
+				 to rotate without collision so we proceed with
+				 the rotation process
+ 03D4  B1 01							MOV CL,1
+									;sets t
+				he new orientation of the piece in the data
+ 03D6  88 0F							MOV [BX],CL
+ 03D8  83 C3 03							ADD BX,3
+									;SI now
+				 points to the left/right piece data
+ 03DB  83 C7 10							ADD DI,10H
+									;DI now
+				 points to the data of the new orientation
+ 03DE  B9 0010							MOV CX,16
+ 03E1  8A 15			COPYDATA0:		MOV DL,[DI]
+ 03E3  88 17							MOV [BX],DL
+ 03E5  47							INC DI
+ 03E6  43							INC BX
+ 03E7  E2 F8							LOOP COPYDATA0
+ 03E9  EB 5E 90							JMP BREAK
+								
+ 03EC				ROTATE180:		
+ 03EC  B9 0020							MOV CX,20H
+ 03EF  E8 0842 R						CALL RotationCo
+				llision
+ 03F2  74 55							JZ BREAK
+								;Piece is clear
+				 to rotate without collision so we proceed with
+				 the rotation process
+ 03F4  B1 02							MOV CL,2
+									;sets t
+				he new orientation of the piece in the data
+ 03F6  88 0F							MOV [BX],CL
+ 03F8  83 C3 03							ADD BX,3
+									;SI now
+				 points to the left/right piece data
+ 03FB  83 C7 20							ADD DI,20H
+									;DI now
+				 points to the data of the new orientation
+ 03FE  B9 0010							MOV CX,16
+ 0401  8A 15			COPYDATA1:		MOV DL,[DI]
+ 0403  88 17							MOV [BX],DL
+ 0405  47							INC DI
+ 0406  43							INC BX
+ 0407  E2 F8							LOOP COPYDATA1
+ 0409  EB 3E 90							JMP BREAK
+								
+ 040C				ROTATE270:		
+ 040C  B9 0030							MOV CX,30H
+ 040F  E8 0842 R						CALL RotationCo
+				llision
+ 0412  74 35							JZ BREAK
+								;Piece is clear
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-30
+
+
+				 to rotate without collision so we proceed with
+				 the rotation process
+ 0414  B1 03							MOV CL,3
+									;sets t
+				he new orientation of the piece in the data
+ 0416  88 0F							MOV [BX],CL
+ 0418  83 C3 03							ADD BX,3
+									;SI now
+				 points to the left/right piece data
+ 041B  83 C7 30							ADD DI,30H
+									;DI now
+				 points to the data of the new orientation
+ 041E  B9 0010							MOV CX,16
+ 0421  8A 15			COPYDATA2:		MOV DL,[DI]
+ 0423  88 17							MOV [BX],DL
+ 0425  47							INC DI
+ 0426  43							INC BX
+ 0427  E2 D8							LOOP COPYDATA1
+ 0429  EB 1E 90							JMP BREAK
+								
+ 042C				ROTATE360:		
+ 042C  B9 0000							MOV CX,00H
+ 042F  E8 0842 R						CALL RotationCo
+				llision
+ 0432  74 15							JZ BREAK
+								;Piece is clear
+				 to rotate without collision so we proceed with
+				 the rotation process
+ 0434  B1 00							MOV CL,0
+									;sets t
+				he new orientation of the piece in the data
+ 0436  88 0F							MOV [BX],CL
+ 0438  83 C3 03							ADD BX,3
+									;SI now
+				 points to the left/right piece data
+ 043B  B9 0010							MOV CX,16
+ 043E  8A 15			COPYDATA3:		MOV DL,[DI]
+ 0440  88 17							MOV [BX],DL
+ 0442  47							INC DI
+ 0443  43							INC BX
+ 0444  E2 F8							LOOP COPYDATA3
+ 0446  EB 01 90							JMP BREAK
+									
+					
+ 0449				BREAK:			
+								POPA
+ 0449  5F                    1	   pop di 
+ 044A  5E                    1	   pop si 
+ 044B  5D                    1	   pop bp 
+ 044C  5C                    1	   pop sp 
+ 044D  5B                    1	   pop bx 
+ 044E  5A                    1	   pop dx 
+ 044F  59                    1	   pop cx 
+ 0450  58                    1	   pop ax 
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-31
+
+
+ 0451  E8 02B6 R						CALL DrawPiece
+								
+ 0454  C3							RET
+ 0455				RotatePiece		ENDP	
+				;---------------------------
+				;This procedure parses input and calls correspo
+				nding procedures
+				;@param			none
+				;@return		none
+ 0455				ParseInput		PROC	NEAR
+ 0455  B4 01					MOV AH, 1
+ 0457  CD 16					INT 16H
+ 0459  75 01					JNZ YesInput
+ 045B  C3					RET
+ 045C				YesInput:
+ 045C  B4 00					MOV AH, 0
+ 045E  CD 16					INT 16H
+ 0460				ExitGame:
+ 0460  3A 26 AA67 R				CMP AH, ESCCode
+ 0464  75 06					JNZ LeftRotKey
+				
+						;------ this should be changed 
+				to return to menu instead
+ 0466  E8 0996 R				CALL EndGame
+				
+ 0469  E9 0674 R				JMP BreakParseInput
+ 046C				LeftRotKey:
+ 046C  3A 26 AA54 R				CMP AH, leftRotCode
+ 0470  75 16					JNZ LeftLeftKey
+				
+ 0472  80 3E A816 R 01				CMP leftPieceRotationLock,1 ;ch
+				eck if the rotation is locked
+ 0477  74 0C					JZ LeftRotKeyParsed
+				
+ 0479  BE 0000					MOV SI, 0
+ 047C  E8 0238 R				CALL GetTempPiece
+				
+ 047F  BE 0000					MOV SI,0
+ 0482  E8 0377 R				CALL RotatePiece
+ 0485				LeftRotKeyParsed:
+ 0485  E9 0674 R				JMP BreakParseInput
+ 0488				LeftLeftKey:
+ 0488  3A 26 AA52 R				CMP AH, leftLeftCode
+ 048C  75 12					JNZ LeftDownKey
+ 048E  BE 0000					MOV SI, 0
+ 0491  E8 0238 R				CALL GetTempPiece
+				
+ 0494  BE 0000					MOV SI, 0
+ 0497  BB 0001					MOV BX, 1
+ 049A  E8 02FE R				CALL MovePiece
+				
+ 049D  E9 0674 R				JMP BreakParseInput
+ 04A0				LeftDownKey:
+ 04A0  3A 26 AA51 R				CMP AH, leftDownCode
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-32
+
+
+ 04A4  75 12					JNZ LeftRightKey
+ 04A6  BE 0000					MOV SI, 0
+ 04A9  E8 0238 R				CALL GetTempPiece
+				
+ 04AC  BE 0000					MOV SI,0
+ 04AF  BB 0000					MOV BX,0
+ 04B2  E8 02FE R				CALL MovePiece
+				
+				
+ 04B5  E9 0674 R				JMP BreakParseInput
+ 04B8				LeftRightKey:
+ 04B8  3A 26 AA53 R				CMP AH, leftRightCode
+ 04BC  75 12					JNZ RightRotKey
+ 04BE  BE 0000					MOV SI, 0
+ 04C1  E8 0238 R				CALL GetTempPiece
+				
+ 04C4  BE 0000					MOV SI,0
+ 04C7  BB 0002					MOV BX,2
+ 04CA  E8 02FE R				CALL MovePiece
+				
+ 04CD  E9 0674 R				JMP BreakParseInput
+ 04D0				RightRotKey:
+ 04D0  3A 26 AA5D R				CMP AH, rightRotCode
+ 04D4  75 16					JNZ RightLeftKey
+				
+ 04D6  80 3E A81D R 01				CMP rightPieceRotationLock,1 ;c
+				heck if the rotation is locked
+ 04DB  74 0C					JZ BreakRotParseInput
+				
+ 04DD  BE 0004					MOV SI, 4
+ 04E0  E8 0238 R				CALL GetTempPiece
+				
+ 04E3  BE 0004					MOV SI, 4
+ 04E6  E8 0377 R				CALL RotatePiece
+ 04E9				BreakRotParseInput:
+ 04E9  E9 0674 R				JMP BreakParseInput
+ 04EC				RightLeftKey:
+ 04EC  3A 26 AA5B R				CMP AH, rightLeftCode
+ 04F0  75 12					JNZ RightDownKey
+ 04F2  BE 0004					MOV SI, 4
+ 04F5  E8 0238 R				CALL GetTempPiece
+				
+ 04F8  BE 0004					MOV SI, 4
+ 04FB  BB 0001					MOV BX, 1
+ 04FE  E8 02FE R				CALL MovePiece
+				
+ 0501  E9 0674 R				JMP BreakParseInput
+ 0504				RightDownKey:
+ 0504  3A 26 AA5A R				CMP AH, rightDownCode
+ 0508  75 12					JNZ RightRightKey
+ 050A  BE 0004					MOV SI, 4
+ 050D  E8 0238 R				CALL GetTempPiece
+				
+ 0510  BE 0004					MOV SI, 4
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-33
+
+
+ 0513  BB 0000					MOV BX, 0
+ 0516  E8 02FE R				CALL MovePiece
+				
+ 0519  E9 0674 R				JMP BreakParseInput
+ 051C				RightRightKey:
+ 051C  3A 26 AA5C R				CMP AH, rightRightCode
+ 0520  75 12					JNZ LeftPowerup1
+ 0522  BE 0004					MOV SI, 4
+ 0525  E8 0238 R				CALL GetTempPiece
+						
+ 0528  BE 0004					MOV SI, 4
+ 052B  BB 0002					MOV BX, 2
+ 052E  E8 02FE R				CALL MovePiece
+ 0531  E9 0674 R				JMP BreakParseInput
+				
+ 0534				LeftPowerup1:
+ 0534  3A 26 AA55 R				CMP AH, leftPower1
+ 0538  75 1A					JNZ LeftPowerup2
+				
+ 053A  8A 26 A811 R				MOV AH, leftPowerupFreezeCount
+ 053E  80 FC 00					CMP AH, 0
+ 0541  74 0E					JZ	BreakPowerup1
+				
+ 0543  BE 0000					MOV SI, 0
+ 0546  E8 0EFB R				CALL FreezeRotation
+ 0549  80 2E A811 R 01				SUB leftPowerupFreezeCount, 1
+ 054E  E8 0D47 R				CALL UpdatePowerupsScore
+				
+ 0551				BreakPowerup1:
+ 0551  E9 0674 R				JMP BreakParseInput
+				
+ 0554				LeftPowerup2:
+ 0554  3A 26 AA56 R				CMP AH, leftPower2
+ 0558  75 1A					JNZ LeftPowerup3
+				
+ 055A  8A 26 A812 R				MOV AH, leftPowerupSpeedUpCount
+ 055E  80 FC 00					CMP AH, 0
+ 0561  74 0E					JZ	BreakPowerup2
+				
+ 0563  BE 0000					MOV SI, 0
+ 0566  E8 0E9D R				CALL SpeedUpOpponentPiece
+ 0569  80 2E A812 R 01				SUB leftPowerupSpeedUpCount, 1
+ 056E  E8 0D47 R				CALL UpdatePowerupsScore
+				
+ 0571				BreakPowerup2:
+ 0571  E9 0674 R				JMP BreakParseInput
+ 0574				LeftPowerup3:
+ 0574  3A 26 AA57 R				CMP AH, leftPower3
+ 0578  75 1A					JNZ LeftPowerup4
+						
+ 057A  8A 26 A813 R				MOV AH, leftPowerupRemoveLinesC
+				ount
+ 057E  80 FC 00					CMP AH, 0
+ 0581  74 0E					JZ	BreakPowerup3
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-34
+
+
+				
+ 0583  BE 0000					MOV SI, 0
+ 0586  E8 0E77 R				CALL RemoveFourLines
+ 0589  80 2E A813 R 01				SUB leftPowerupRemoveLinesCount
+				, 1
+ 058E  E8 0D47 R				CALL UpdatePowerupsScore
+ 0591				BreakPowerup3:
+ 0591  E9 0674 R				JMP BreakParseInput
+ 0594				LeftPowerup4:
+ 0594  3A 26 AA58 R				CMP AH, LeftPower4
+ 0598  75 1A					JNZ LeftPowerup5
+				
+ 059A  8A 26 A814 R				MOV AH, leftPowerupChangePieceC
+				ount
+ 059E  80 FC 00					CMP AH, 0
+ 05A1  74 0E					JZ	BreakPowerup4
+				
+ 05A3  BE 0000					MOV SI,0
+ 05A6  E8 0F59 R				CALL ChangePiece
+ 05A9  80 2E A814 R 01				SUB leftPowerupChangePieceCount
+				,1
+ 05AE  E8 0D47 R				CALL UpdatePowerupsScore
+ 05B1				BreakPowerup4:
+ 05B1  E9 0674 R				JMP BreakParseInput
+				
+ 05B4				LeftPowerup5:
+ 05B4  3A 26 AA59 R				CMP AH, LeftPower5
+ 05B8  75 1A					JNZ RightPowerup1
+				
+ 05BA  8A 26 A815 R				MOV AH, leftPowerupInsertTwoLin
+				esCount
+ 05BE  80 FC 00					CMP AH, 0
+ 05C1  74 0E					JZ	BreakPowerup5
+				
+				
+ 05C3  BE 0000					MOV SI,0
+ 05C6  E8 0F73 R				CALL InsertTwoLines
+ 05C9  80 2E A815 R 01				SUB leftPowerupInsertTwoLinesCo
+				unt,1
+ 05CE  E8 0D47 R				CALL UpdatePowerupsScore
+				
+ 05D1				BreakPowerup5:
+ 05D1  E9 0674 R				JMP BreakParseInput
+				
+ 05D4				RightPowerup1:
+ 05D4  3A 26 AA5E R				CMP AH, RightPower1
+ 05D8  75 1A					JNZ RightPowerup2
+				
+ 05DA  8A 26 A818 R				MOV AH, rightPowerupFreezeCount
+ 05DE  80 FC 00					CMP AH, 0
+ 05E1  74 EE					JZ	BreakPowerup5
+				
+ 05E3  BE 0004					MOV SI, 4
+ 05E6  E8 0EFB R				CALL FreezeRotation
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-35
+
+
+ 05E9  80 2E A818 R 01				SUB rightPowerupFreezeCount, 1
+ 05EE  E8 0D47 R				CALL UpdatePowerupsScore
+				
+ 05F1  E9 0674 R				JMP BreakParseInput
+ 05F4				RightPowerup2:
+ 05F4  3A 26 AA5F R				CMP AH, RightPower2
+ 05F8  75 1A					JNZ RightPowerup3
+				
+ 05FA  8A 26 A819 R				MOV AH, rightPowerupSpeedUpCoun
+				t
+ 05FE  80 FC 00					CMP AH, 0
+ 0601  74 CE					JZ	BreakPowerup5
+				
+ 0603  BE 0004					MOV SI, 4
+ 0606  E8 0E9D R				CALL SpeedUpOpponentPiece
+ 0609  80 2E A819 R 01				SUB rightPowerupSpeedUpCount, 1
+ 060E  E8 0D47 R				CALL UpdatePowerupsScore
+				
+ 0611  EB 61 90					JMP BreakParseInput
+ 0614				RightPowerup3:
+ 0614  3A 26 AA60 R				CMP AH, RightPower3
+ 0618  75 1A					JNZ RightPowerup4
+				
+ 061A  8A 26 A81A R				MOV AH, rightPowerupRemoveLines
+				Count
+ 061E  80 FC 00					CMP AH, 0
+ 0621  74 AE					JZ	BreakPowerup5
+				
+ 0623  BE 0004					MOV SI, 4
+ 0626  E8 0E77 R				CALL RemoveFourLines
+ 0629  80 2E A81A R 01				SUB rightPowerupRemoveLinesCoun
+				t, 1
+ 062E  E8 0D47 R				CALL UpdatePowerupsScore
+				
+ 0631  EB 41 90					JMP BreakParseInput
+ 0634				RightPowerup4:
+ 0634  3A 26 AA61 R				CMP AH, RightPower4
+ 0638  75 1A					JNZ RightPowerup5
+				
+ 063A  8A 26 A81B R				MOV AH, rightPowerupChangePiece
+				Count
+ 063E  80 FC 00					CMP AH, 0
+ 0641  74 8E					JZ	BreakPowerup5
+				
+ 0643  BE 0004					MOV SI,4
+ 0646  E8 0F59 R				CALL ChangePiece
+ 0649  80 2E A81B R 01				SUB rightPowerupChangePieceCoun
+				t,1
+ 064E  E8 0D47 R				CALL UpdatePowerupsScore
+				
+ 0651  EB 21 90					JMP BreakParseInput
+ 0654				RightPowerup5:
+ 0654  3A 26 AA62 R				CMP AH, RightPower5
+ 0658  75 1A					JNZ BreakParseInput
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-36
+
+
+				
+ 065A  8A 26 A81C R				MOV AH, rightPowerupInsertTwoLi
+				nesCount
+ 065E  80 FC 00					CMP AH, 0
+ 0661  74 11					JZ	BreakParseInput
+				
+ 0663  BE 0004					MOV SI,4
+ 0666  E8 0F73 R				CALL InsertTwoLines
+ 0669  80 2E A81C R 01				SUB rightPowerupInsertTwoLinesC
+				ount,1
+ 066E  E8 0D47 R				CALL UpdatePowerupsScore
+				
+ 0671  EB 01 90					JMP BreakParseInput
+				
+ 0674				BreakParseInput:
+ 0674  C3					RET
+ 0675				ParseInput		ENDP
+				;---------------------------
+				;This Procedure is called in the gameloop to mo
+				ve the pieces downward each second
+				;@param			none
+				;@return		none
+ 0675				PieceGravity	PROC	NEAR
+								PUSHA
+ 0675  50                    1	   push ax 
+ 0676  51                    1	   push cx 
+ 0677  52                    1	   push dx 
+ 0678  53                    1	   push bx 
+ 0679  54                    1	   push sp 
+ 067A  55                    1	   push bp 
+ 067B  56                    1	   push si 
+ 067C  57                    1	   push di 
+ 067D  B4 2C							mov  AH, 2CH
+ 067F  CD 21							INT  21H 
+							;RETURN SECONDS IN DH.
+ 0681  3A 36 ABF2 R						CMP DH,seconds
+						;Check if one second has passed
+ 0685  74 65							JE NO_CHANGE
+ 0687  88 36 ABF2 R						MOV seconds,DH
+						;moves current second to the se
+				conds variable
+ 068B  BB 0000							MOV BX,0
+							;Parameter to move piec
+				e in particular direction
+ 068E  BE 0000							MOV SI,0
+ 0691  E8 0238 R						CALL GetTempPie
+				ce	;sets the TempPieceOffset with the addr
+				ess of the leftPiece
+ 0694  B8 0000							MOV AX,0
+							;Clearing AX before usi
+				ng it
+ 0697  A1 AA10 R						MOV AX,tempPiec
+				eOffset ;gets the leftPiece's data offset
+ 069A  05 0014							ADD AX,14H
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-37
+
+
+							;Access the speed of th
+				e left piece
+ 069D  8B F8							MOV DI,AX
+							;DI=leftPieceSpeed
+ 069F  B9 0000							MOV CX,0
+							;Clears the CX before l
+				ooping
+ 06A2  8A 0D							MOV CL,[DI]
+							;moves the piece number
+				 of steps equal to it's speed
+ 06A4						MOVELEFT:		
+ 06A4  E8 02FE R						CALL MovePiece
+ 06A7  74 05							JZ COLL1
+ 06A9  E2 F9							LOOP MOVELEFT
+ 06AB  EB 10 90							JMP CHECK2
+ 06AE						COLL1:	
+ 06AE  BE 0000							MOV SI,0
+ 06B1  E8 0F24 R						CALL UnfreezeRo
+				tation
+ 06B4  E8 0EC6 R						CALL ResetPiece
+				Speed	;if changed reset it to its original
+ 06B7  E8 0931 R						CALL CheckLineC
+				lear		;check if a line has been clear
+				ed
+ 06BA  E8 07DC R						CALL GenerateRa
+				ndomPiece
+								
+ 06BD  BE 0004					CHECK2:	MOV SI,4	
+						
+ 06C0  E8 0238 R						CALL GetTempPie
+				ce	;sets the TempPieceOffset with the addr
+				ess of the rightPiece
+ 06C3  B8 0000							MOV AX,0
+							;Clearing AX before usi
+				ng it
+ 06C6  A1 AA10 R						MOV AX,tempPiec
+				eOffset	;gets the rightPiece's data offset
+ 06C9  05 0014							ADD AX,14H
+							;Access the speed of th
+				e right piece
+ 06CC  8B F8							MOV DI,AX
+							;DI=rightPieceSpeed
+ 06CE  B9 0000							MOV CX,0
+							;Clears the CX before l
+				ooping
+ 06D1  8A 0D							MOV CL,[DI]
+							;moves the piece number
+				 of steps equal to it's speed
+ 06D3						MOVERIGHT:		
+ 06D3  E8 02FE R						CALL MovePiece
+ 06D6  74 05							JZ	COLL2
+ 06D8  E2 F9							LOOP MOVERIGHT
+ 06DA  EB 10 90							JMP NO_CHANGE
+ 06DD						COLL2:	
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-38
+
+
+ 06DD  BE 0004							MOV SI,4
+ 06E0  E8 0F24 R						CALL UnfreezeRo
+				tation
+ 06E3  E8 0EC6 R						CALL ResetPiece
+				Speed	;if chnaged reset it to its original sp
+				eed
+ 06E6  E8 0931 R						CALL CheckLineC
+				lear		;check if a line has been clear
+				ed
+ 06E9  E8 07DC R						CALL GenerateRa
+				ndomPiece
+ 06EC						NO_CHANGE:	
+								POPA
+ 06EC  5F                    1	   pop di 
+ 06ED  5E                    1	   pop si 
+ 06EE  5D                    1	   pop bp 
+ 06EF  5C                    1	   pop sp 
+ 06F0  5B                    1	   pop bx 
+ 06F1  5A                    1	   pop dx 
+ 06F2  59                    1	   pop cx 
+ 06F3  58                    1	   pop ax 
+ 06F4  C3							RET
+ 06F5				PieceGravity	ENDP	
+				;---------------------------
+				;This procedure sets the collision piece by cop
+				ying temp piece data to collision data
+				;@params	none
+				;@return 	none
+ 06F5				setCollisionPiece	PROC	NEAR
+							PUSHA
+ 06F5  50                    1	   push ax 
+ 06F6  51                    1	   push cx 
+ 06F7  52                    1	   push dx 
+ 06F8  53                    1	   push bx 
+ 06F9  54                    1	   push sp 
+ 06FA  55                    1	   push bp 
+ 06FB  56                    1	   push si 
+ 06FC  57                    1	   push di 
+				
+ 06FD  8B 36 AA10 R					MOV SI, tempPieceOffset
+				  		;get the offset of the source d
+				ata
+ 0701  BF AA12 R					MOV DI, offset collisio
+				nPieceId	;offset of the destination data
+				
+							
+ 0704  B9 0015						MOV CX, 21D	
+									;loop 2
+				1 bytes to copy all the data
+ 0707  8A 1C			copyPieceData:		MOV BL, [SI]	
+								;copy the data 
+				in byte to BX
+ 0709  88 1D						MOV [DI], BL	
+								;paste the data
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-39
+
+
+				 in the destination byte
+ 070B  47						INC DI		
+									;increm
+				ent destination offset
+ 070C  46						INC SI		
+									;increm
+				ent source offset
+ 070D  E2 F8						LOOP copyPieceData
+								;loop
+				
+							POPA
+ 070F  5F                    1	   pop di 
+ 0710  5E                    1	   pop si 
+ 0711  5D                    1	   pop bp 
+ 0712  5C                    1	   pop sp 
+ 0713  5B                    1	   pop bx 
+ 0714  5A                    1	   pop dx 
+ 0715  59                    1	   pop cx 
+ 0716  58                    1	   pop ax 
+ 0717  C3						RET
+ 0718				setCollisionPiece	ENDP
+				;---------------------------
+				;Procedure to check the collision of the collis
+				ionPiece with the blocks
+				;@params: NONE
+				;@return: AL: 1 collision, 0 no collision
+ 0718				CheckCollisionWithBlocks	PROC	NEAR
+								PUSHA
+ 0718  50                    1	   push ax 
+ 0719  51                    1	   push cx 
+ 071A  52                    1	   push dx 
+ 071B  53                    1	   push bx 
+ 071C  54                    1	   push sp 
+ 071D  55                    1	   push bp 
+ 071E  56                    1	   push si 
+ 071F  57                    1	   push di 
+				
+ 0720  BB AA12 R						MOV BX, offset 
+				collisionPieceId
+ 0723  8B FB							MOV DI, BX
+									
+					;Load the piece 4x4 string address in p
+				ieceData
+ 0725  83 C7 04							ADD DI,	4
+									
+					;Go to the string data to put in DI
+ 0728  B9 0000							MOV CX, 0
+									
+					;iterate over the 16 cells of the piece
+								;if the piece h
+				as color !black, draw it with it's color
+								;cell location 
+				is:
+								;cell_x = orig_
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-40
+
+
+				x + id%4
+								;cell_y = orig_
+				y + id/4
+				
+ 072B						loopOverPieceData:	
+						
+ 072B  8A 15							MOV DL, [DI]
+									;copy t
+				he byte of color of current cell into DL
+ 072D  80 FA 00							CMP DL, 0D
+									
+					;check if color of current piece block 
+				is black
+ 0730  74 1F							JZ	 checkN
+				extByte
+				
+								;If byte has co
+				lor
+ 0732  51							PUSH CX
+				
+ 0733  8B C1							MOV AX, CX
+ 0735  B1 04							MOV CL, 4D
+ 0737  F6 F1							DIV CL	
+									;AH = i
+				d%4, AL = id/4
+ 0739  B9 0000							MOV CX, 0
+ 073C  BA 0000							MOV DX, 0
+ 073F  8A 4F 02							MOV CL, [BX+2]
+								;load selected 
+				piece X into CL
+ 0742  8A 57 03							MOV DL, [BX+3]
+								;load selected 
+				piece Y into DL
+ 0745  02 CC							ADD CL, AH
+									;CX = o
+				rig_x + id%4
+ 0747  02 D0							ADD DL, AL
+									;DX = o
+				rig_y + id/4
+				
+ 0749  E8 0181 R						CALL GetBlockCl
+				r
+				
+ 074C  3C 00							CMP AL, 0D
+ 074E  59							POP  CX
+ 074F  75 12							JNZ collisionWi
+				thBlockHappens 
+				
+								
+							
+ 0751							checkNextByte:
+ 0751  41							INC CX	
+					
+ 0752  47							INC DI
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-41
+
+
+ 0753  83 F9 10							CMP CX, 16D
+ 0756  75 D3							JNZ loopOverPie
+				ceData
+								
+								POPA
+ 0758  5F                    1	   pop di 
+ 0759  5E                    1	   pop si 
+ 075A  5D                    1	   pop bp 
+ 075B  5C                    1	   pop sp 
+ 075C  5B                    1	   pop bx 
+ 075D  5A                    1	   pop dx 
+ 075E  59                    1	   pop cx 
+ 075F  58                    1	   pop ax 
+ 0760  B0 00							MOV AL,0D
+ 0762  C3							RET
+				
+ 0763								collisionWithBl
+				ockHappens:
+				
+								POPA
+ 0763  5F                    1	   pop di 
+ 0764  5E                    1	   pop si 
+ 0765  5D                    1	   pop bp 
+ 0766  5C                    1	   pop sp 
+ 0767  5B                    1	   pop bx 
+ 0768  5A                    1	   pop dx 
+ 0769  59                    1	   pop cx 
+ 076A  58                    1	   pop ax 
+ 076B  B0 01							MOV AL,1D
+ 076D  C3							RET
+				
+ 076E				CheckCollisionWithBlocks	ENDP
+				;---------------------------
+ 076E				CheckCollisionWithFrame	PROC	NEAR
+									
+					PUSHA
+ 076E  50                    1	   push ax 
+ 076F  51                    1	   push cx 
+ 0770  52                    1	   push dx 
+ 0771  53                    1	   push bx 
+ 0772  54                    1	   push sp 
+ 0773  55                    1	   push bp 
+ 0774  56                    1	   push si 
+ 0775  57                    1	   push di 
+				
+ 0776  BB AA12 R				MOV BX, offset collisionPieceId
+ 0779  8B FB					MOV DI, BX		
+								;Load the piece
+				 4x4 string address in pieceData
+ 077B  83 C7 04					ADD DI,	4		
+								;Go to the stri
+				ng data to put in DI
+ 077E  B9 0000					MOV CX, 0D		
+								;iterate over t
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-42
+
+
+				he 16 cells of the piece
+						;if the piece has color !black,
+				 draw it with black
+						;cell location is:
+						;cell_x = orig_x + id%4
+						;cell_y = orig_y + id/4
+ 0781				CheckCollisionWithFrameLoop:		
+					
+ 0781  8A 15					MOV DL, [DI]		
+							;copy the byte of color
+				 of current cell into DL
+ 0783  80 FA 00					CMP DL, 0D		
+								;check if color
+				 of current piece block is black
+ 0786  74 22					JZ 	blockEmpty
+						
+ 0788  51					PUSH CX
+						
+ 0789  8B C1					MOV AX, CX
+ 078B  B1 04					MOV CL, 4D
+ 078D  F6 F1					DIV CL			
+							;AH = id%4, AL = id/4
+ 078F  B9 0000					MOV CX, 0
+ 0792  BA 0000					MOV DX, 0
+ 0795  8A 4F 02					MOV CL, [BX+2]		
+						;load selected piece X into CL
+ 0798  8A 57 03					MOV DL, [BX+3]		
+						;load selected piece Y into DL
+ 079B  02 CC					ADD CL, AH		
+							;CX = orig_x + id%4
+ 079D  02 D0					ADD DL, AL		
+							;DX = orig_y + id/4
+						
+ 079F  83 F9 0A					CMP CX, FRAMEWIDTH
+ 07A2  73 18					JAE outOfScreen
+ 07A4  83 FA 14					CMP DX, FRAMEHEIGHT
+ 07A7  73 13					JAE outOfScreen 
+						 
+ 07A9  59					POP  CX
+ 07AA				blockEmpty:		
+ 07AA  41					INC CX
+ 07AB  47					INC DI
+ 07AC  83 F9 10					CMP CX, 16D
+ 07AF  75 D0					JNZ CheckCollisionWithFrameLoop
+				
+						POPA
+ 07B1  5F                    1	   pop di 
+ 07B2  5E                    1	   pop si 
+ 07B3  5D                    1	   pop bp 
+ 07B4  5C                    1	   pop sp 
+ 07B5  5B                    1	   pop bx 
+ 07B6  5A                    1	   pop dx 
+ 07B7  59                    1	   pop cx 
+ 07B8  58                    1	   pop ax 
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-43
+
+
+ 07B9  B0 00					MOV AL,0
+ 07BB  C3					RET
+				
+ 07BC				outOfScreen:
+ 07BC  59						POP  CX
+							POPA
+ 07BD  5F                    1	   pop di 
+ 07BE  5E                    1	   pop si 
+ 07BF  5D                    1	   pop bp 
+ 07C0  5C                    1	   pop sp 
+ 07C1  5B                    1	   pop bx 
+ 07C2  5A                    1	   pop dx 
+ 07C3  59                    1	   pop cx 
+ 07C4  58                    1	   pop ax 
+ 07C5  B0 01						MOV AL,1
+ 07C7  C3						RET
+ 07C8				CheckCollisionWithFrame	ENDP
+				;---------------------------
+				;Procedure to check the collision with both the
+				 frame and blocks
+				;@params: SI:0 for left screen,4 for right scre
+				en
+				;@return: AL: 1 collision, 0 no collision
+ 07C8				CheckCollision	PROC	NEAR
+ 07C8  E8 076E R						CALL CheckColli
+				sionWithFrame
+ 07CB  3C 01							CMP AL, 1
+ 07CD  74 0A							JE CollisionHap
+				pens
+				
+ 07CF  E8 0718 R						CALL CheckColli
+				sionWithBlocks
+ 07D2  3C 01							CMP AL,1
+ 07D4  74 03							JE CollisionHap
+				pens
+				
+ 07D6  B0 00							MOV AL,0
+ 07D8  C3							RET
+ 07D9				CollisionHappens: 
+ 07D9  B0 01							MOV AL,1
+ 07DB  C3							RET
+ 07DC				CheckCollision	ENDP
+				;---------------------------
+				;Procedure to generate a random piece and set i
+				t's data in current screen data
+				;@param		SI:0 for left screen,4 for righ
+				t screen
+				;@return 	GameFlag Var = Screen that lost
+ 07DC				GenerateRandomPiece		PROC 	NEAR
+									
+					PUSHA
+ 07DC  50                    1	   push ax 
+ 07DD  51                    1	   push cx 
+ 07DE  52                    1	   push dx 
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-44
+
+
+ 07DF  53                    1	   push bx 
+ 07E0  54                    1	   push sp 
+ 07E1  55                    1	   push bp 
+ 07E2  56                    1	   push si 
+ 07E3  57                    1	   push di 
+ 07E4  B4 2C								
+					MOV AH,2CH
+ 07E6  CD 21								
+					INT 21H		;Returns seconds in DH
+ 07E8  B8 0000								
+					MOV AX,0
+ 07EB  8A C6								
+					MOV AL,DH	;AL=Seconds
+ 07ED  B9 0007								
+					MOV CX,7
+ 07F0  F6 F1								
+					DIV CL
+ 07F2  BB 0000								
+					MOV BX,0
+ 07F5  8A DC								
+					MOV BL,AH	;BL now contains the ID
+				 of the random piece
+ 07F7  E8 0D79 R							
+					CALL CopyNextPieceData
+ 07FA  E8 0253 R							
+					CALL GetTempNextPiece
+ 07FD  E8 0DE9 R							
+					CALL DeleteNextPiece
+ 0800  E8 01F6 R							
+					CALL SetNextPieceData
+ 0803  E8 0DA3 R							
+					CALL DrawNextPiece
+ 0806  E8 06F5 R							
+					CALL setCollisionPiece
+ 0809  E8 07C8 R							
+					CALL CheckCollision
+ 080C  3C 01								
+					CMP AL,1
+ 080E  74 0C								
+					JZ COLLIDE
+ 0810  E8 02B6 R							
+					CALL DrawPiece
+									
+					POPA
+ 0813  5F                    1	   pop di 
+ 0814  5E                    1	   pop si 
+ 0815  5D                    1	   pop bp 
+ 0816  5C                    1	   pop sp 
+ 0817  5B                    1	   pop bx 
+ 0818  5A                    1	   pop dx 
+ 0819  59                    1	   pop cx 
+ 081A  58                    1	   pop ax 
+ 081B  C3								
+					RET
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-45
+
+
+ 081C				COLLIDE:				
+ 081C  8B DE								
+					MOV BX,SI
+ 081E  88 1E ABF3 R							
+					MOV GameFlag,BL
+									
+					POPA
+ 0822  5F                    1	   pop di 
+ 0823  5E                    1	   pop si 
+ 0824  5D                    1	   pop bp 
+ 0825  5C                    1	   pop sp 
+ 0826  5B                    1	   pop bx 
+ 0827  5A                    1	   pop dx 
+ 0828  59                    1	   pop cx 
+ 0829  58                    1	   pop ax 
+ 082A  C3								
+					RET
+ 082B				GenerateRandomPiece		ENDP
+				
+				;---------------------------
+				;Procedure to generate a random number
+				;@param		BL: Random Number % AL 
+				;@return 	BL: the random number
+ 082B				GenerateRandomNumber	PROC 	NEAR
+ 082B  50								
+					PUSH AX
+ 082C  52								
+					PUSH DX
+ 082D  51								
+					PUSH CX
+									
+					
+ 082E  B4 2C								
+					MOV AH,2CH
+ 0830  CD 21								
+					INT 21H		;Returns seconds in DH
+ 0832  B8 0000								
+					MOV AX,0
+ 0835  8A C6								
+					MOV AL,DH	;AL=Seconds
+ 0837  F6 F3								
+					DIV BL
+ 0839  BB 0000								
+					MOV BX,0
+ 083C  8A DC								
+					MOV BL,AH	;BL now contains the ID
+				 of the random piece
+									
+					
+ 083E  59								
+					POP CX
+ 083F  5A								
+					POP DX
+ 0840  58								
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-46
+
+
+					POP AX
+									
+					
+ 0841  C3								
+					RET
+ 0842				GenerateRandomNumber	ENDP
+				;---------------------------
+				;Procedure to check for collision before rotati
+				on
+				;@param			CX:Added number to go t
+				he correct piece, SI:0 for left , 4 for right
+				;@return		ZF:if 0 then collided ,
+				1 clear to rotate
+ 0842				RotationCollision	PROC	NEAR
+									PUSHA
+ 0842  50                    1	   push ax 
+ 0843  51                    1	   push cx 
+ 0844  52                    1	   push dx 
+ 0845  53                    1	   push bx 
+ 0846  54                    1	   push sp 
+ 0847  55                    1	   push bp 
+ 0848  56                    1	   push si 
+ 0849  57                    1	   push di 
+ 084A  4B								DEC BX
+									
+					;SI Points to PieceID
+ 084B  03 F9								ADD DI,
+				CX					;DI Poi
+				nts to the data after applying the rotation
+ 084D  57								PUSH DI
+									;Stack 
+				holds temporarily offset of the data after rota
+				tion
+ 084E  BF AA12 R							MOV DI,
+				offset collisionPieceId	;DI = collisionPieceID
+ 0851  B9 0004								MOV CX,
+				4
+ 0854  8A 07			COPYCOLL0:			MOV AL,[BX]
+ 0856  88 05								MOV [DI
+				],AL
+ 0858  43								INC BX
+ 0859  47								INC DI
+ 085A  E2 F8								LOOP CO
+				PYCOLL0
+ 085C  83 C3 10								ADD BX,
+				16D
+ 085F  83 C7 10								ADD DI,
+				16D
+ 0862  8A 07								MOV AL,
+				[BX]
+ 0864  88 05								MOV [DI
+				],AL
+ 0866  83 EF 10								SUB DI,
+				16D
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-47
+
+
+ 0869  5B								POP BX
+							;BX holds offset of the
+				 data after rotation
+ 086A  B9 0010								MOV CX,
+				16
+ 086D  8A 07			COPYCOLLDATA0:		MOV AL,[BX]
+ 086F  88 05								MOV [DI
+				],AL
+ 0871  43								INC BX
+ 0872  47								INC DI
+ 0873  E2 F8								LOOP CO
+				PYCOLLDATA0
+ 0875  E8 07C8 R							CALL Ch
+				eckCollision
+ 0878  3C 01								CMP AL,
+				1
+									POPA
+ 087A  5F                    1	   pop di 
+ 087B  5E                    1	   pop si 
+ 087C  5D                    1	   pop bp 
+ 087D  5C                    1	   pop sp 
+ 087E  5B                    1	   pop bx 
+ 087F  5A                    1	   pop dx 
+ 0880  59                    1	   pop cx 
+ 0881  58                    1	   pop ax 
+ 0882  C3								RET
+ 0883				RotationCollision	ENDP
+				;---------------------------
+				;Shifts all the line up from Y = 0:14	 and X 
+				= 0:9
+				;@param			SI: screen ID: 0 for le
+				ft, 4 for right
+				;@return		none
+ 0883				ShiftLinesUp	PROC	NEAR
+								PUSHA
+ 0883  50                    1	   push ax 
+ 0884  51                    1	   push cx 
+ 0885  52                    1	   push dx 
+ 0886  53                    1	   push bx 
+ 0887  54                    1	   push sp 
+ 0888  55                    1	   push bp 
+ 0889  56                    1	   push si 
+ 088A  57                    1	   push di 
+				
+ 088B  E8 0238 R						CALL GetTempPie
+				ce
+ 088E  E8 06F5 R						CALL setCollisi
+				onPiece
+ 0891  E8 026E R						CALL DeletePiec
+				e		;we need to remove the piece be
+				fore shifting, to avoid shifting the piece itse
+				lf
+				
+ 0894  BA 0000							MOV DX, 0D
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-48
+
+
+								;initialize dx 
+				at 0
+ 0897				SHIFTUPLOOPY:
+ 0897  B9 0000							MOV CX, 0D
+ 089A				SHIFTUPLOOPX:
+ 089A  42							INC DX
+ 089B  E8 0181 R						CALL GetBlockCl
+				r		;get block color at (X,Y+1)
+ 089E  4A							DEC DX
+ 089F  E8 01AE R						CALL DrawBlockC
+				lr		;draw block color at (X,Y)
+				
+ 08A2  41							INC CX
+ 08A3  83 F9 0A							CMP CX, FRAMEWI
+				DTH		;check if X is 10
+ 08A6  75 F2							JNZ SHIFTUPLOOP
+				X		;if it is, start back from X = 
+				0 at new Y
+				
+ 08A8  42							INC DX	
+ 08A9  83 FA 13							CMP DX, FRAMEHE
+				IGHT-1	;check if Y is = 15
+ 08AC  75 E9							JNZ SHIFTUPLOOP
+				Y
+				
+ 08AE  E8 0718 R						CALL CheckColli
+				sionWithBlocks
+ 08B1  3C 01							CMP AL, 1
+ 08B3  75 0E							JNZ ShiftUpNoCo
+				llision
+				
+ 08B5  B0 01							MOV AL, 1
+ 08B7  E8 0238 R						CALL GetTempPie
+				ce
+ 08BA  8B 1E AA10 R						MOV BX, tempPie
+				ceOffset
+ 08BE  83 C3 03							ADD BX, 3
+ 08C1  28 07							SUB [BX], AL
+				
+ 08C3				ShiftUpNoCollision:
+ 08C3  E8 02B6 R						CALL DrawPiece
+				
+								POPA
+ 08C6  5F                    1	   pop di 
+ 08C7  5E                    1	   pop si 
+ 08C8  5D                    1	   pop bp 
+ 08C9  5C                    1	   pop sp 
+ 08CA  5B                    1	   pop bx 
+ 08CB  5A                    1	   pop dx 
+ 08CC  59                    1	   pop cx 
+ 08CD  58                    1	   pop ax 
+ 08CE  C3							RET
+ 08CF				ShiftLinesUp	ENDP
+				;---------------------------
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-49
+
+
+				;Shifts all the line down from Y = 0:Y_in and X
+				 = 0:9
+				;@param 		SI: screen ID: 0 for le
+				ft, 4 for right
+				;				DX:	Y_in to
+				 begin shifting down at
+				;@return		none
+ 08CF				ShiftLinesDown	PROC	NEAR
+								PUSHA
+ 08CF  50                    1	   push ax 
+ 08D0  51                    1	   push cx 
+ 08D1  52                    1	   push dx 
+ 08D2  53                    1	   push bx 
+ 08D3  54                    1	   push sp 
+ 08D4  55                    1	   push bp 
+ 08D5  56                    1	   push si 
+ 08D6  57                    1	   push di 
+								;DX is initiall
+				y Y_in
+ 08D7				SHIFTDOWNLOOPY:
+ 08D7  B9 0000							MOV CX, 0D
+ 08DA				SHIFTDOWNLOOPX:
+ 08DA  4A							DEC DX
+ 08DB  E8 0181 R						CALL GetBlockCl
+				r		;get block color at (X,Y+1)
+ 08DE  42							INC DX
+ 08DF  E8 01AE R						CALL DrawBlockC
+				lr		;draw block color at (X,Y)
+				
+ 08E2  41							INC CX
+ 08E3  83 F9 0A							CMP CX, FRAMEWI
+				DTH		;check if X is = FRAME WIDTH
+ 08E6  75 F2							JNZ SHIFTDOWNLO
+				OPX		;if it is, start back from X = 
+				0 at new Y
+				
+ 08E8  4A							DEC DX	
+ 08E9  83 FA 00							CMP DX, 0D 
+								;check if Y is 
+				= 0
+ 08EC  75 E9							JNZ SHIFTDOWNLO
+				OPY
+				
+ 08EE  B9 0000							MOV CX, 0D
+ 08F1  BA 0000							MOV DX, 0D
+ 08F4  B0 00							MOV AL, 0D
+ 08F6				CLEARFIRSTLINE:	
+ 08F6  E8 01AE R						CALL DrawBlockC
+				lr				
+ 08F9  41							INC CX
+ 08FA  83 F9 0A							CMP CX, 10D
+ 08FD  75 F7							JNZ CLEARFIRSTL
+				INE
+								POPA
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-50
+
+
+ 08FF  5F                    1	   pop di 
+ 0900  5E                    1	   pop si 
+ 0901  5D                    1	   pop bp 
+ 0902  5C                    1	   pop sp 
+ 0903  5B                    1	   pop bx 
+ 0904  5A                    1	   pop dx 
+ 0905  59                    1	   pop cx 
+ 0906  58                    1	   pop ax 
+ 0907  C3							RET
+ 0908				ShiftLinesDown	ENDP
+				;---------------------------
+				;This procedure inserts a new gray line at the 
+				screen
+				;@param			SI: screen ID: 0 for le
+				ft, 4 for right
+				;@return		none
+ 0908				InsertLine		PROC	NEAR
+								PUSHA
+ 0908  50                    1	   push ax 
+ 0909  51                    1	   push cx 
+ 090A  52                    1	   push dx 
+ 090B  53                    1	   push bx 
+ 090C  54                    1	   push sp 
+ 090D  55                    1	   push bp 
+ 090E  56                    1	   push si 
+ 090F  57                    1	   push di 
+ 0910  E8 0883 R						CALL ShiftLines
+				Up		;shift all lines up 1 block
+				
+								;draw a gray li
+				ne at X = 0
+ 0913  BA 0013							MOV DX, FRAMEHE
+				IGHT-1
+ 0916  B9 0000							MOV CX, 0D
+ 0919  B0 08							MOV AL, GRAYBLO
+				CKCLR
+ 091B				INSERTLINELOOPX:			
+							;loop from x=0:10 and d
+				raw gray block		
+ 091B  E8 01AE R						CALL DrawBlockC
+				lr
+ 091E  41							INC CX
+ 091F  83 F9 0A							CMP CX, FRAMEWI
+				DTH		
+ 0922  75 F7							JNZ INSERTLINEL
+				OOPX
+				
+				
+				
+								POPA
+ 0924  5F                    1	   pop di 
+ 0925  5E                    1	   pop si 
+ 0926  5D                    1	   pop bp 
+ 0927  5C                    1	   pop sp 
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-51
+
+
+ 0928  5B                    1	   pop bx 
+ 0929  5A                    1	   pop dx 
+ 092A  59                    1	   pop cx 
+ 092B  58                    1	   pop ax 
+ 092C  C3							RET
+ 092D				InsertLine		ENDP
+				;---------------------------
+				;This procedure removes the line at Y = Y_in an
+				d shifts all lines down
+				;@param			SI: screen ID: 0 for le
+				ft, 4 for right
+				;				DX: Y_in to hav
+				e the line removed at
+				;@return		none
+ 092D				RemoveLine		PROC	NEAR
+				
+ 092D  E8 08CF R						CALL ShiftLines
+				Down
+				
+ 0930  C3							RET
+ 0931				RemoveLine		ENDP
+				;---------------------------
+				;This procedure checks if a full line has been 
+				completed, if it is, it gets cleared
+				;@param			SI: screen ID: 0 for le
+				ft, 4 for right
+				;@return		none
+ 0931				CheckLineClear	PROC	NEAR
+								PUSHA
+ 0931  50                    1	   push ax 
+ 0932  51                    1	   push cx 
+ 0933  52                    1	   push dx 
+ 0934  53                    1	   push bx 
+ 0935  54                    1	   push sp 
+ 0936  55                    1	   push bp 
+ 0937  56                    1	   push si 
+ 0938  57                    1	   push di 
+				
+ 0939  BA 0000							MOV DX, 0D
+ 093C				CHECKLINELOOPY:
+ 093C  B9 0000							MOV CX, 0D
+ 093F  BB 0000							MOV BX, 0D 
+									;counte
+				r for the number of colored blocks
+ 0942				CHECKLINELOOPX:
+ 0942  E8 0181 R						CALL GetBlockCl
+				r
+ 0945  3C 00							CMP AL, 0D
+									;if blo
+				ck color is not black or gray, inc BX
+ 0947  74 0B							JE 	CHECKLI
+				NESKIPINC
+ 0949  3C 08							CMP AL, GRAYBLO
+				CKCLR
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-52
+
+
+ 094B  74 07							JE	CHECKLI
+				NESKIPINC
+				
+ 094D  43							INC BX
+ 094E  41							INC CX
+ 094F  83 F9 0A							CMP CX, FRAMEWI
+				DTH
+ 0952  75 EE							JNZ CHECKLINELO
+				OPX
+ 0954				CHECKLINESKIPINC:
+ 0954  83 FB 0A							CMP BX, 10D
+									;check 
+				if there is 16 colored blocks
+ 0957  75 2E							JNZ	CHECKLI
+				NESKIPRMV		;if there is, delete th
+				at line
+ 0959  E8 092D R						CALL RemoveLine
+				
+								;now we need to
+				 insert a line at the other player
+ 095C  8B C6							MOV AX, SI
+ 095E  83 FE 00							CMP SI, 0D
+ 0961  75 11							JNZ CHECKLINESI
+				IS0			;if SI is 4, make it 0,
+				 if it's 0, make it 4
+ 0963  80 06 A810 R 01						ADD Player1Scor
+				e, DeltaScore		;increase score
+ 0968  E8 0E2F R						CALL AddPowerup
+				Check
+ 096B  E8 0D0F R						CALL UpdatePlay
+				ersScore
+				
+ 096E  BE 0004							MOV SI, 4D
+ 0971  EB 0F 90							JMP CHECKLINESI
+				IS4
+ 0974				CHECKLINESIIS0:
+ 0974  80 06 A817 R 01						ADD Player2Scor
+				e, DeltaScore		;increase score
+ 0979  E8 0E2F R						CALL AddPowerup
+				Check
+ 097C  E8 0D0F R						CALL UpdatePlay
+				ersScore
+ 097F  BE 0000							MOV SI, 0D
+ 0982				CHECKLINESIIS4:
+ 0982  E8 0908 R						CALL InsertLine
+								;insert a line 
+				at the other player
+ 0985  8B F0							MOV SI, AX
+									;reset 
+				the SI value back
+ 0987				CHECKLINESKIPRMV:
+ 0987  42							INC DX
+ 0988  83 FA 14							CMP DX, FRAMEHE
+				IGHT
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-53
+
+
+ 098B  75 AF							JNZ CHECKLINELO
+				OPY
+				
+								POPA
+ 098D  5F                    1	   pop di 
+ 098E  5E                    1	   pop si 
+ 098F  5D                    1	   pop bp 
+ 0990  5C                    1	   pop sp 
+ 0991  5B                    1	   pop bx 
+ 0992  5A                    1	   pop dx 
+ 0993  59                    1	   pop cx 
+ 0994  58                    1	   pop ax 
+ 0995  C3							RET
+ 0996				CheckLineClear	ENDP
+				;---------------------------
+				;Procedure to End Game
+				;@param			none
+				;@return		none
+ 0996				EndGame		PROC 	NEAR
+							;Change to Text MODE
+ 0996  B4 00						MOV AH,0          
+ 0998  B0 03						MOV AL,03h
+ 099A  CD 10						INT 10h 
+ 099C  B8 4C00						MOV AX, 4C00H     ;SETU
+				P FOR EXIT
+ 099F  CD 21						INT 21H         ;RETURN
+				 CONTROL TO DOS
+ 09A1				EndGame		ENDP
+				;---------------------------
+				;Procedure to wait for a key to be pressed
+				;@param			none
+				;@return 		AL(ascii-code)  AH(scan
+				code)
+ 09A1				Wait4Key		PROC 	NEAR
+ 09A1  B4 00							MOV AH,00H 
+ 09A3  CD 16							INT 16H
+ 09A5  C3							RET
+ 09A6				Wait4Key		ENDP
+				;---------------------------
+				;Procedure to get message from user at cursor p
+				osition
+				;@param			none
+				;@return		none
+ 09A6				GetMessage		PROC 	NEAR
+ 09A6  B4 0A							MOV AH,0AH 
+ 09A8  CD 21							INT 21H
+ 09AA  C3							RET
+ 09AB				GetMessage		ENDP
+				;---------------------------
+				;Procedure to set cursor position 
+				;@param			DH (Y)  DL(X)
+				;@return		none
+ 09AB				MoveCursor		PROC 	NEAR
+ 09AB  B4 02							MOV AH,02H     
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-54
+
+
+				     ;Move Cursor
+ 09AD  32 FF							XOR BH,BH
+ 09AF  CD 10							INT 10H
+ 09B1  C3							RET
+ 09B2				MoveCursor		ENDP
+				;---------------------------
+				;Procedure to show char at cursor position  
+				;@param			AL(ascii-code) BL(col)
+				;@return		none
+ 09B2				PrintChar		PROC 	NEAR
+ 09B2  B4 09							MOV AH, 09H
+									
+								
+ 09B4  32 FF							XOR BH,BH ; VID
+				EO PAGE = 0 
+ 09B6  B9 0001							MOV CX, 1
+ 09B9  CD 10							INT 10H
+ 09BB  C3							RET
+ 09BC				PrintChar		ENDP
+				;---------------------------
+				;Procedure to show message  
+				;@param			BP (offset of string) C
+				X(size)
+				;				BL(color) DH (Y
+				)  DL(X)
+				;@return		none
+ 09BC				PrintMessage	PROC 	NEAR
+ 09BC  B4 13							MOV AH, 13H ; W
+				RITE THE STRING
+ 09BE  B0 01							MOV AL, 01H; AT
+				TRIBUTE IN BL, MOVE CURSOR TO THAT POSITION
+ 09C0  32 FF							XOR BH,BH ; VID
+				EO PAGE = 0
+ 09C2  CD 10							INT 10H
+ 09C4  C3							RET
+ 09C5				PrintMessage	ENDP		
+				;---------------------------
+				;Procedure to Open a binary file with image dat
+				a in it
+				;@param			none		
+						
+				;@return		none
+ 09C5				OpenLogoFile 	PROC 	NEAR
+				
+							; Open file
+				
+ 09C5  B4 3D						MOV AH, 3Dh
+ 09C7  B0 00						MOV AL, 0 ; read only
+ 09C9  8D 16 A802 R					LEA DX, Logofilename
+ 09CD  CD 21						INT 21h
+ 09CF  A3 A80B R					MOV [LogoFilehandle], A
+				X
+							
+ 09D2  C3						RET
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-55
+
+
+				
+ 09D3				OpenLogoFile 	ENDP
+				;---------------------------
+				;Procedure to read data from binary file opened
+				;@param			none		
+						
+				;@return		none
+ 09D3				ReadLogoData	 PROC 	NEAR
+				
+ 09D3  B4 3F						MOV AH,3Fh
+ 09D5  8B 1E A80B R					MOV BX, LogoFilehandle
+ 09D9  B9 0001						MOV CX, 1	 ; numb
+				er of bytes to read
+ 09DC  FF 06 A80D R					INC PositionInLogoFile
+ 09E0  8D 16 A80F R					LEA DX, LogoData
+ 09E4  CD 21						INT 21h
+ 09E6  C3						RET
+ 09E7				ReadLogoData	 ENDP 
+				;---------------------------
+				;Procedure to Close the opened file
+				;@param			none		
+						
+				;@return		none
+ 09E7				CloseLogoFile 	PROC 	NEAR
+ 09E7  B4 3E						MOV AH, 3Eh
+ 09E9  8B 1E A80B R					MOV BX, [LogoFilehandle
+				]
+ 09ED  CD 21						INT 21h
+ 09EF  C3						RET
+ 09F0				CloseLogoFile 	ENDP
+				;---------------------------
+				;Procedure to Draw the logo 
+				;@param			BX->array of pixels to 
+				draw	Make Sure in proper GFX mode	
+						
+				;@return		none
+ 09F0				DrawLogo 	PROC 	NEAR
+ 09F0  E8 09C5 R					CALL OpenLogoFile
+				
+ 09F3  8D 1E A80F R					LEA BX , LogoData 
+ 09F7  B9 00AA						MOV CX,LogostX
+ 09FA  BA 001E						MOV DX,LogostY
+ 09FD  B4 0C						MOV AH,0ch ;Draw offset
+							
+ 09FF				drawLoop:
+							;Go load from file acco
+				rding to PositionInLogoFile
+							PUSHA ; to separate loa
+				ding from drawing
+ 09FF  50                    1	   push ax 
+ 0A00  51                    1	   push cx 
+ 0A01  52                    1	   push dx 
+ 0A02  53                    1	   push bx 
+ 0A03  54                    1	   push sp 
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-56
+
+
+ 0A04  55                    1	   push bp 
+ 0A05  56                    1	   push si 
+ 0A06  57                    1	   push di 
+							
+ 0A07  B4 42						MOV AH,42H 	
+							  ;SERVICE FOR SEEK.
+ 0A09  B0 00						MOV AL,0	
+							  ;START FROM THE BEGIN
+				NING OF FILE.
+ 0A0B  8B 1E A80B R					MOV BX,LogoFilehandle
+					  ;FILE
+ 0A0F  B9 0000						MOV CX,0	
+							  ;THE FILE POSITION MU
+				ST BE PLACED IN
+ 0A12  8B 16 A80D R					MOV DX,PositionInLogoFi
+				le ;CX:DX, TO JUMP TO POSITION
+ 0A16  CD 21						INT 21H
+							
+ 0A18  E8 09D3 R					CALL ReadLogoData
+							
+							POPA
+ 0A1B  5F                    1	   pop di 
+ 0A1C  5E                    1	   pop si 
+ 0A1D  5D                    1	   pop bp 
+ 0A1E  5C                    1	   pop sp 
+ 0A1F  5B                    1	   pop bx 
+ 0A20  5A                    1	   pop dx 
+ 0A21  59                    1	   pop cx 
+ 0A22  58                    1	   pop ax 
+							
+ 0A23  8A 07						MOV AL,[BX]
+ 0A25  3C 0F						CMP AL, 0FH
+ 0A27  74 02						JZ SkipPixel
+ 0A29  CD 10						INT 10h 
+ 0A2B  41			SkipPixel:	INC CX 
+ 0A2C  81 F9 01D3					CMP CX,LogofnX
+ 0A30  75 CD						JNE drawLoop 
+							
+ 0A32  B9 00AA						MOV CX , LogostX
+ 0A35  42						INC DX
+ 0A36  81 FA 00E6					CMP DX , LogofnY
+ 0A3A  75 C3						JNE drawLoop
+							
+ 0A3C  E8 09E7 R					CALL CloseLogoFile
+							
+ 0A3F  C3						RET
+ 0A40				DrawLogo	ENDP			
+				;---------------------------
+				;Procedure to Draw the logo Menu
+				;@param			none		
+					
+				;@return		none
+ 0A40				DrawLogoMenu 	PROC	NEAR
+ 0A40  E8 09F0 R					CALL DrawLogo
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-57
+
+
+							
+				
+ 0A43  BD AB65 R					MOV BP, OFFSET Logo2 ; 
+				ES: BP POINTS TO THE TEXT
+ 0A46  B9 0018						MOV CX, L2sz
+ 0A49  B6 12						MOV DH, 18;ROW TO PLACE
+				 STRING
+ 0A4B  B2 1B						MOV DL, 27 ; COLUMN TO 
+				PLACE STRING
+ 0A4D  B3 04						MOV BL, 04H ;Red
+ 0A4F  E8 09BC R					CALL PrintMessage
+				
+ 0A52  BD AB7D R					MOV BP, OFFSET Logo3 ; 
+				ES: BP POINTS TO THE TEXT
+ 0A55  B9 001D						MOV CX, L3sz
+ 0A58  B6 14						MOV DH, 20;ROW TO PLACE
+				 STRING
+ 0A5A  B2 1B						MOV DL, 27 ; COLUMN TO 
+				PLACE STRING
+ 0A5C  B3 0F						MOV BL, 15 ;WHITE
+ 0A5E  E8 09BC R					CALL PrintMessage
+					
+							
+ 0A61  E8 09A1 R		SelectMode: CALL Wait4Key
+ 0A64  3A 26 AA67 R					CMP AH,	EscCode
+ 0A68  75 0A						JNZ Check4game
+							
+ 0A6A  B4 00						MOV AH, 00H ; Set video
+				 mode
+ 0A6C  B0 13						MOV AL, 13H ; Mode 13h
+ 0A6E  CD 10						INT 10H 
+ 0A70  B4 4C						MOV AH, 4CH     ;SETUP 
+				FOR EXIT
+ 0A72  CD 21						INT 21H         ;RETURN
+				 CONTROL TO DOS
+							
+ 0A74  3A 26 AA65 R		Check4game:	CMP AH,F2Code		
+ 0A78  75 E7						JNE SelectMode
+							
+							
+							
+							
+ 0A7A  C3						RET
+ 0A7B				DrawLogoMenu 	ENDP
+				;---------------------------
+				;Procedure to get player name
+				;@param		none (proper GFX mode)
+				;@			none
+ 0A7B				GetName		PROC 	NEAR
+								;call videomode
+				13h
+ 0A7B  B4 00							MOV AH, 00H ; S
+				et video mode
+ 0A7D  B0 13							MOV AL, 13H ; M
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-58
+
+
+				ode 13h
+ 0A7F  CD 10							INT 10H 
+								
+ 0A81  BD AB0E R						MOV BP, OFFSET 
+				Menu11 ; ES: BP POINTS TO THE TEXT
+ 0A84  B9 0017							MOV CX,M11sz ;S
+				IZE OF STRING
+ 0A87  B6 06							MOV DH, 6 ;ROW 
+				TO PLACE STRING
+ 0A89  B2 0A							MOV DL, 10 ; CO
+				LUMN TO PLACE STRING
+ 0A8B  B3 0F							MOV BL, 15 ;WHI
+				TE
+ 0A8D  E8 09BC R						CALL PrintMessa
+				ge
+				
+ 0A90  B6 0B							MOV DH, 11 ;ROW
+				 TO PLACE CURSOR
+ 0A92  B2 0A							MOV DL, 10 ; CO
+				LUMN TO PLACE CURSOR
+ 0A94  E8 09AB R						CALL MoveCursor
+				
+				
+ 0A97  BA ABDA R						MOV DX,OFFSET N
+				AME1
+ 0A9A  E8 09A6 R						CALL GetMessage
+				
+				
+ 0A9D  BD AB25 R						MOV BP, OFFSET 
+				Menu12 ; ES: BP POINTS TO THE TEXT
+ 0AA0  B9 001B							MOV CX, M12sz ;
+				 LENGTH OF THE STRING
+ 0AA3  B6 0E							MOV DH, 14 ;ROW
+				 TO PLACE STRING
+ 0AA5  B2 0A							MOV DL, 10 ; CO
+				LUMN TO PLACE STRING
+ 0AA7  B3 0F							MOV BL, 15 ;WHI
+				TE				
+ 0AA9  E8 09BC R						CALL PrintMessa
+				ge
+				
+ 0AAC  E8 09A1 R						WAIT4Enter: CAL
+				L Wait4Key			
+ 0AAF  3A 26 AA63 R							
+						CMP AH,	EnterCode
+ 0AB3  75 F7								
+						JNE WAIT4Enter
+									
+						
+								;Call ClearScre
+				en
+ 0AB5  B4 00							MOV AH, 00H ; S
+				et video mode
+ 0AB7  B0 13							MOV AL, 13H ; M
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-59
+
+
+				ode 13h
+ 0AB9  CD 10							INT 10H 
+				
+ 0ABB  BD AB0E R						MOV BP, OFFSET 
+				Menu11 ; ES: BP POINTS TO THE TEXT
+ 0ABE  B9 0017							MOV CX,M11sz ;S
+				IZE OF STRING
+ 0AC1  B6 06							MOV DH, 6 ;ROW 
+				TO PLACE STRING
+ 0AC3  B2 0A							MOV DL, 10 ; CO
+				LUMN TO PLACE STRING
+ 0AC5  B3 0F							MOV BL, 15 ;WHI
+				TE				
+ 0AC7  E8 09BC R						CALL PrintMessa
+				ge
+				
+ 0ACA  B6 0B							MOV DH, 11 ;ROW
+				 TO PLACE CURSOR
+ 0ACC  B2 0A							MOV DL, 10 ; CO
+				LUMN TO PLACE CURSOR
+ 0ACE  E8 09AB R						CALL MoveCursor
+				
+				
+ 0AD1  BA ABE6 R						MOV DX,OFFSET N
+				AME2
+ 0AD4  E8 09A6 R						CALL GetMessage
+				
+				
+ 0AD7  BD AB25 R						MOV BP, OFFSET 
+				Menu12 ; ES: BP POINTS TO THE TEXT
+ 0ADA  B9 001B							MOV CX, M12sz ;
+				 LENGTH OF THE STRING
+ 0ADD  B6 0E							MOV DH, 14 ;ROW
+				 TO PLACE STRING
+ 0ADF  B2 0A							MOV DL, 10 ; CO
+				LUMN TO PLACE STRING
+ 0AE1  B3 0F							MOV BL, 15 ;WHI
+				TE
+ 0AE3  E8 09BC R						CALL PrintMessa
+				ge
+									
+						
+ 0AE6  E8 09A1 R						WAIT4Enter2: CA
+				LL Wait4Key
+ 0AE9  3A 26 AA63 R							
+						 CMP AH,	EnterCode
+ 0AED  75 F7								
+						 JNE WAIT4Enter2	
+						
+ 0AEF  C3						RET
+ 0AF0				GetName		ENDP			
+				;---------------------------
+				;Procedure to show menu on opening the game 
+				;@param			none
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-60
+
+
+				;@return		none
+ 0AF0				DisplayMenu 	PROC     NEAR		
+					
+								
+ 0AF0  E8 0053 R						CALL Initialize
+				NewGame
+				
+									;Game L
+				ogo Screen
+ 0AF3  B8 4F02							MOV     AX, 4F0
+				2H
+ 0AF6  BB 0100							MOV     BX, 010
+				0H
+ 0AF9  CD 10							INT     10H
+									
+									
+						
+ 0AFB  E8 0A40 R						CALL DrawLogoMe
+				nu			
+								
+ 0AFE  B4 00							MOV AH, 00H ; S
+				et video mode
+ 0B00  B0 13							MOV AL, 13H ; M
+				ode 13h
+ 0B02  CD 10							INT 10H
+				
+ 0B04  BD ABDC R						MOV BP, OFFSET 
+				Player1 ; ES: BP POINTS TO THE TEXT
+ 0B07  B9 0006							MOV CX, NameSz
+ 0B0A  B6 06							MOV DH, 6 ;ROW 
+				TO PLACE STRING
+ 0B0C  B2 06							MOV DL, 6 ; COL
+				UMN TO PLACE STRING
+ 0B0E  B3 0F							MOV BL, 15 ;WHI
+				TE
+ 0B10  E8 09BC R						CALL PrintMessa
+				ge
+									
+ 0B13  BD AB40 R						MOV BP, OFFSET 
+				Menu21 ; ES: BP POINTS TO THE TEXT
+ 0B16  B9 0012							MOV CX, M21sz ;
+				SIZE OF STRING
+ 0B19  B6 06							MOV DH, 6 ;ROW 
+				TO PLACE STRING
+ 0B1B  B2 0C							MOV DL, 12 ; CO
+				LUMN TO PLACE STRING
+ 0B1D  B3 0F							MOV BL, 15 ;WHI
+				TE
+ 0B1F  E8 09BC R						CALL PrintMessa
+				ge
+				
+ 0B22  BD ABE8 R						MOV BP, OFFSET 
+				Player2 ; ES: BP POINTS TO THE TEXT
+ 0B25  B9 0006							MOV CX, NameSz
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-61
+
+
+ 0B28  B6 0A							MOV DH, 10 ;ROW
+				 TO PLACE STRING
+ 0B2A  B2 06							MOV DL, 6 ; COL
+				UMN TO PLACE STRING
+ 0B2C  B3 0F							MOV BL, 15 ;WHI
+				TE
+ 0B2E  E8 09BC R						CALL PrintMessa
+				ge
+									
+ 0B31  BD AB52 R						MOV BP, OFFSET 
+				Menu22 ; ES: BP POINTS TO THE TEXT
+ 0B34  B9 0013							MOV CX, M22sz ;
+				SIZE OF STRING
+ 0B37  B6 0A							MOV DH, 10 ;ROW
+				 TO PLACE STRING
+ 0B39  B2 0C							MOV DL, 12 ; CO
+				LUMN TO PLACE STRING
+ 0B3B  B3 0F							MOV BL, 15 ;WHI
+				TE
+ 0B3D  E8 09BC R						CALL PrintMessa
+				ge
+				
+ 0B40  E8 09A1 R						Wait4Ready: CAL
+				L Wait4Key
+ 0B43  3A 26 AA65 R							
+						CMP AH,	F2Code
+ 0B47  74 1E								
+						JE F2Pressed
+ 0B49  3A 26 AA66 R							
+						CMP AH, F10Code
+ 0B4D  75 F1								
+						JNE WAIT4Ready
+ 0B4F  FE C4								
+						INC AH
+ 0B51  88 26 ABD8 R							
+						MOV RPly2,AH
+ 0B55  B6 0B								MOV DH,
+				 11 ;ROW TO PLACE STRING
+ 0B57  B2 06								MOV DL,
+				 6 ; COLUMN TO PLACE STRING
+ 0B59  E8 09AB R							CALL Mo
+				veCursor
+				
+ 0B5C  A0 ABD6 R							MOV AL,
+				 Ready; ATTRIBUTE IN BL, MOVE CURSOR TO THAT PO
+				SITION 
+ 0B5F  B3 0F								MOV BL,
+				 15 ;WHITE
+ 0B61  E8 09B2 R							CALL Pr
+				intChar
+									
+ 0B64  EB 16 90								JMP Che
+				ckR
+									
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-62
+
+
+ 0B67  FE C4					F2Pressed:  INC AH
+ 0B69  88 26 ABD7 R							MOV RPl
+				y1,AH
+ 0B6D  B6 07								MOV DH,
+				 7 ;ROW TO PLACE STRING
+ 0B6F  B2 06								MOV DL,
+				 6 ; COLUMN TO PLACE STRING
+ 0B71  E8 09AB R							CALL Mo
+				veCursor
+				
+ 0B74  A0 ABD6 R							MOV AL,
+				 Ready; ATTRIBUTE IN BL, MOVE CURSOR TO THAT PO
+				SITION 
+ 0B77  B3 0F								MOV BL,
+				 15 ;WHITE
+ 0B79  E8 09B2 R							CALL Pr
+				intChar
+									
+ 0B7C  80 FC 05					CheckR:     CMP AH,5H ;Dummy nu
+				mber to check if ready
+ 0B7F  8A 26 ABD7 R							MOV AH,
+				 RPly1
+ 0B83  22 26 ABD8 R							AND AH,
+				 RPly2
+ 0B87  74 B7								JZ  Wai
+				t4Ready
+ 0B89  C3								RET
+						
+ 0B8A				DisplayMenu      	ENDP
+				;---------------------------
+				;Procedure to print message that game ended
+				;@param			none
+				;@return		none
+ 0B8A				GameEnded		PROC	NEAR
+ 0B8A  E8 09A1 R						CALL Wait4Key
+ 0B8D  3A 26 AA67 R						CMP AH, ESCcode
+ 0B91  74 27							JE	ExitPro
+				g
+ 0B93  BD ABB3 R						MOV BP, OFFSET 
+				GameEnded1 ; ES: BP POINTS TO THE TEXT
+ 0B96  B9 000A							MOV CX, GE1sz
+ 0B99  B6 20							MOV DH, GE1Y ; 
+				ROW TO PLACE STRING
+ 0B9B  B2 35							MOV DL, GE1X ; 
+				COLUMN TO PLACE STRING
+ 0B9D  B3 04							MOV BL, 04H ;Re
+				d
+ 0B9F  E8 09BC R						CALL PrintMessa
+				ge
+				
+								
+ 0BA2  BD ABBD R						MOV BP, OFFSET 
+				GameEnded2 ; ES: BP POINTS TO THE TEXT
+ 0BA5  B9 0019							MOV CX, GE2sz
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-63
+
+
+ 0BA8  B6 22							MOV DH, GE2Y ;R
+				OW TO PLACE STRING
+ 0BAA  B2 2F							MOV DL, GE2X ; 
+				COLUMN TO PLACE STRING
+ 0BAC  B3 04							MOV BL, 04H ;Re
+				d
+ 0BAE  E8 09BC R						CALL PrintMessa
+				ge	
+								
+ 0BB1  E8 09A1 R						CALL Wait4Key
+ 0BB4  3A 26 AA67 R						CMP AH, ESCcode
+					
+ 0BB8  75 03							JNE Ret2ViewMen
+				u
+ 0BBA  E8 0996 R		ExitProg:		CALL EndGame	
+ 0BBD  C3			Ret2ViewMenu:	RET
+ 0BBE				GameEnded		ENDP		
+						
+				;---------------------------
+				;Procedure to show menu on finishing the game 
+				;@param			none
+				;@return		none
+ 0BBE				EndGameMenu		PROC 	NEAR
+				
+ 0BBE  B8 4F02							MOV AX, 4F02H
+ 0BC1  BB 0100							MOV BX, 0100H
+ 0BC4  CD 10							INT 10H
+				
+ 0BC6  C7 06 A80D R 0000					MOV PositionInL
+				ogoFile,0
+								
+ 0BCC  E8 09F0 R						CALL DrawLogo
+								
+ 0BCF  BD AB9A R						MOV BP, OFFSET 
+				Logo4 ; ES: BP POINTS TO THE TEXT
+ 0BD2  B9 0019							MOV CX, L4sz
+ 0BD5  B6 10							MOV DH, 16 ; RO
+				W TO PLACE STRING
+ 0BD7  B2 1B							MOV DL, 27 ; CO
+				LUMN TO PLACE STRING
+ 0BD9  B3 0F							MOV BL, 0FH ;Wh
+				ite
+ 0BDB  E8 09BC R						CALL PrintMessa
+				ge
+				
+								
+ 0BDE  BD AB7D R						MOV BP, OFFSET 
+				Logo3 ; ES: BP POINTS TO THE TEXT
+ 0BE1  B9 001D							MOV CX, L3sz
+ 0BE4  B6 12							MOV DH, 18 ;ROW
+				 TO PLACE STRING
+ 0BE6  B2 1B							MOV DL, 27 ; CO
+				LUMN TO PLACE STRING
+ 0BE8  B3 0F							MOV BL, 0FH ;WH
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-64
+
+
+				ITE
+ 0BEA  E8 09BC R						CALL PrintMessa
+				ge	
+								
+ 0BED  E8 09A1 R		ControlOp:		CALL Wait4Key
+ 0BF0  3A 26 AA63 R						CMP AH, EnterCo
+				de
+ 0BF4  75 01							JNE CkEsc
+ 0BF6  C3							RET
+ 0BF7  3A 26 AA67 R		CkEsc:			CMP AH,EscCode
+ 0BFB  75 F0							JNE ControlOp
+ 0BFD  E8 0996 R						CALL EndGame
+				
+								
+								
+ 0C00				EndGameMenu		ENDP
+				;----------------------------------------------
+				-----
+				;Parses score number into text to be displayed 
+				on the screen
+				;Params		NONE
+				;Returns 	NONE
+ 0C00				ChangeScoreToText	PROC	NEAR
+									PUSHA
+ 0C00  50                    1	   push ax 
+ 0C01  51                    1	   push cx 
+ 0C02  52                    1	   push dx 
+ 0C03  53                    1	   push bx 
+ 0C04  54                    1	   push sp 
+ 0C05  55                    1	   push bp 
+ 0C06  56                    1	   push si 
+ 0C07  57                    1	   push di 
+ 0C08  B4 00								MOV AH,
+				 0
+ 0C0A  A0 A810 R							MOV AL,
+				Player1Score
+ 0C0D  B1 0A								MOV CL,
+				10D
+ 0C0F  F6 F1								DIV CL
+ 0C11  04 30								ADD AL,
+				30H
+ 0C13  8D 36 AA72 R							LEA SI,
+				LeftScoreText
+ 0C17  88 04								MOV [SI
+				],AL
+ 0C19  46								INC SI
+ 0C1A  80 C4 30								ADD AH,
+				30H
+ 0C1D  88 24								MOV [SI
+				],AH
+				
+ 0C1F  B4 00								MOV AH,
+				 0
+ 0C21  A0 A817 R							MOV AL,
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-65
+
+
+				Player2Score
+ 0C24  B1 0A								MOV CL,
+				10D
+ 0C26  F6 F1								DIV CL
+ 0C28  04 30								ADD AL,
+				30H
+ 0C2A  8D 36 AA74 R							LEA SI,
+				RightScoreText
+ 0C2E  88 04								MOV [SI
+				],AL
+ 0C30  46								INC SI
+ 0C31  80 C4 30								ADD AH,
+				30H
+ 0C34  88 24								MOV [SI
+				],AH
+									
+									POPA
+ 0C36  5F                    1	   pop di 
+ 0C37  5E                    1	   pop si 
+ 0C38  5D                    1	   pop bp 
+ 0C39  5C                    1	   pop sp 
+ 0C3A  5B                    1	   pop bx 
+ 0C3B  5A                    1	   pop dx 
+ 0C3C  59                    1	   pop cx 
+ 0C3D  58                    1	   pop ax 
+ 0C3E  C3								RET
+ 0C3F				ChangeScoreToText	ENDP
+				;----------------------------------------------
+				-----
+				;This procedure is responsible for drawing the 
+				text for the UI
+				;@param				none
+				;@return			none
+ 0C3F				DrawGUIText		PROC	NEAR
+								PUSHA
+ 0C3F  50                    1	   push ax 
+ 0C40  51                    1	   push cx 
+ 0C41  52                    1	   push dx 
+ 0C42  53                    1	   push bx 
+ 0C43  54                    1	   push sp 
+ 0C44  55                    1	   push bp 
+ 0C45  56                    1	   push si 
+ 0C46  57                    1	   push di 
+				
+								;score bars
+								;top
+ 0C47  B4 13							mov ah, 13h
+ 0C49  B9 0080							mov cx, Underli
+				neStringLength
+ 0C4C  B6 1F							mov dh, LeftSco
+				reLocY-2
+ 0C4E  B2 00							mov dl, 0
+ 0C50  8D 2E AA76 R						lea bp, Underli
+				neString
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-66
+
+
+ 0C54  BB 0007							mov bx, 07h
+ 0C57  CD 10							int 10h
+				
+								;bottom
+ 0C59  B4 13							mov ah, 13h
+ 0C5B  B9 0080							mov cx, Underli
+				neStringLength
+ 0C5E  B6 22							mov dh, LeftSco
+				reLocY+1
+ 0C60  B2 00							mov dl, 0
+ 0C62  8D 2E AA76 R						lea bp, Underli
+				neString
+ 0C66  BB 0007							mov bx, 07h
+ 0C69  CD 10							int 10h
+				
+								;notification b
+				ar
+ 0C6B  B4 13							mov ah, 13h
+ 0C6D  B9 0080							mov cx, Underli
+				neStringLength
+ 0C70  B6 2E							mov dh, 46
+ 0C72  B2 00							mov dl, 0
+ 0C74  8D 2E AA76 R						lea bp, Underli
+				neString
+ 0C78  BB 0007							mov bx, 07h
+ 0C7B  CD 10							int 10h
+				
+								;notification t
+				ext
+ 0C7D  B4 13							mov ah, 13h
+ 0C7F  B9 0018							mov cx, PressEs
+				cToExitStringLength
+ 0C82  B6 2F							mov dh, 47
+ 0C84  B2 00							mov dl, 0
+ 0C86  8D 2E AAF6 R						lea bp, PressEs
+				cToExitString
+ 0C8A  BB 0007							mov bx, 07h
+ 0C8D  CD 10							int 10h
+							
+				
+								;render the lef
+				t screen next piece text
+ 0C8F  B4 13							mov ah, 13h
+ 0C91  B9 0004							mov cx, NEXTPIE
+				CETEXTLENGTH
+ 0C94  B6 04							mov dh, LEFTNEX
+				TPIECELOCY
+ 0C96  B2 2D							mov dl, LEFTNEX
+				TPIECELOCX
+ 0C98  8D 2E AA68 R						lea bp, NEXTPIE
+				CETEXT
+ 0C9C  BB 0004							mov bx, 4d
+ 0C9F  CD 10							int 10h
+				
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-67
+
+
+								;render the rig
+				ht screen next piece text
+ 0CA1  B4 13							mov ah, 13h
+ 0CA3  B9 0004							mov cx, NEXTPIE
+				CETEXTLENGTH
+ 0CA6  B6 04							mov dh, RIGHTNE
+				XTPIECELOCY
+ 0CA8  B2 6C							mov dl, RIGHTNE
+				XTPIECELOCX
+ 0CAA  8D 2E AA68 R						lea bp, NEXTPIE
+				CETEXT
+ 0CAE  BB 0004							mov bx, 4d
+ 0CB1  CD 10							int 10h
+								
+								;render the lef
+				t screen score text
+ 0CB3  B4 13							mov ah, 13h
+ 0CB5  B9 0006							mov cx, SCORETE
+				XTLENGTH
+ 0CB8  B6 21							mov dh, LeftSco
+				reLocY
+ 0CBA  B2 17							mov dl, LeftSco
+				reLocX
+ 0CBC  8D 2E AA6C R						lea bp, SCORETE
+				XT
+ 0CC0  BB 0004							mov bx, 4d
+ 0CC3  CD 10							int 10h
+								
+								;render the lef
+				t screen score text
+ 0CC5  B4 13							mov ah, 13h
+ 0CC7  B9 0006							mov cx, NameSz
+ 0CCA  B6 21 90 90						mov dh, LeftPly
+				LocY
+ 0CCE  B2 0D 90 90						mov dl, LeftPly
+				LocX
+ 0CD2  8D 2E ABDC R						lea bp, Player1
+ 0CD6  BB 0004							mov bx, 4d
+ 0CD9  CD 10							int 10h
+								
+ 0CDB  B4 13							mov ah, 13h
+ 0CDD  B9 0006							mov cx, NameSz
+ 0CE0  B6 21 90 90						mov dh, RightPl
+				yLocY
+ 0CE4  B2 4D 90 90						mov dl, RightPl
+				yLocX
+ 0CE8  8D 2E ABE8 R						lea bp, Player2
+ 0CEC  BB 0004							mov bx, 4d
+ 0CEF  CD 10							int 10h
+								
+ 0CF1  B4 13							mov ah, 13h
+ 0CF3  B9 0006							mov cx, SCORETE
+				XTLENGTH
+ 0CF6  B6 21							mov dh, RightSc
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-68
+
+
+				oreLocY
+ 0CF8  B2 57							mov dl, RightSc
+				oreLocX
+ 0CFA  8D 2E AA6C R						lea bp, SCORETE
+				XT
+ 0CFE  BB 0004							mov bx, 4d
+ 0D01  CD 10							int 10h
+				
+ 0D03  E8 0D0F R						CALL UpdatePlay
+				ersScore	;render the score itself
+								
+								POPA
+ 0D06  5F                    1	   pop di 
+ 0D07  5E                    1	   pop si 
+ 0D08  5D                    1	   pop bp 
+ 0D09  5C                    1	   pop sp 
+ 0D0A  5B                    1	   pop bx 
+ 0D0B  5A                    1	   pop dx 
+ 0D0C  59                    1	   pop cx 
+ 0D0D  58                    1	   pop ax 
+ 0D0E  C3							RET
+ 0D0F				DrawGUIText		ENDP
+				;----------------------------------------------
+				-----
+				;This procedure parses the scores of the two pl
+				ayers and changes
+				;it to strings, then draws them on the screen
+				;@param			none
+				;@return		none
+ 0D0F				UpdatePlayersScore	PROC	NEAR
+									PUSHA
+ 0D0F  50                    1	   push ax 
+ 0D10  51                    1	   push cx 
+ 0D11  52                    1	   push dx 
+ 0D12  53                    1	   push bx 
+ 0D13  54                    1	   push sp 
+ 0D14  55                    1	   push bp 
+ 0D15  56                    1	   push si 
+ 0D16  57                    1	   push di 
+ 0D17  E8 0C00 R							CALL Ch
+				angeScoreToText
+				
+ 0D1A  B4 13								mov ah,
+				 13h
+ 0D1C  B9 0002								mov cx,
+				 LeftScoreTextLength
+ 0D1F  B6 21								mov dh,
+				 LeftScoreStringLocY
+ 0D21  B2 1E								mov dl,
+				 LeftScoreStringLocX
+ 0D23  8D 2E AA72 R							lea bp,
+				 LeftScoreText
+ 0D27  BB 0004								mov bx,
+				 4d
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-69
+
+
+ 0D2A  CD 10								int 10h
+				
+ 0D2C  B4 13								mov ah,
+				 13h
+ 0D2E  B9 0002								mov cx,
+				 RightScoreTextLength
+ 0D31  B6 21								mov dh,
+				 RightScoreStringLocY
+ 0D33  B2 5E								mov dl,
+				 RightScoreStringLocX
+ 0D35  8D 2E AA74 R							lea bp,
+				 RightScoreText
+ 0D39  BB 0004								mov bx,
+				 4d
+ 0D3C  CD 10								int 10h
+									POPA
+ 0D3E  5F                    1	   pop di 
+ 0D3F  5E                    1	   pop si 
+ 0D40  5D                    1	   pop bp 
+ 0D41  5C                    1	   pop sp 
+ 0D42  5B                    1	   pop bx 
+ 0D43  5A                    1	   pop dx 
+ 0D44  59                    1	   pop cx 
+ 0D45  58                    1	   pop ax 
+ 0D46  C3								RET
+ 0D47				UpdatePlayersScore	ENDP
+				;----------------------------------------------
+				-----
+				;This procedure updates the score of the poweru
+				ps for both players
+				;@param				none
+				;@return			none
+ 0D47				UpdatePowerupsScore	PROC	NEAR
+									PUSHA
+ 0D47  50                    1	   push ax 
+ 0D48  51                    1	   push cx 
+ 0D49  52                    1	   push dx 
+ 0D4A  53                    1	   push bx 
+ 0D4B  54                    1	   push sp 
+ 0D4C  55                    1	   push bp 
+ 0D4D  56                    1	   push si 
+ 0D4E  57                    1	   push di 
+				
+									POPA
+ 0D4F  5F                    1	   pop di 
+ 0D50  5E                    1	   pop si 
+ 0D51  5D                    1	   pop bp 
+ 0D52  5C                    1	   pop sp 
+ 0D53  5B                    1	   pop bx 
+ 0D54  5A                    1	   pop dx 
+ 0D55  59                    1	   pop cx 
+ 0D56  58                    1	   pop ax 
+ 0D57  C3								RET
+ 0D58				UpdatePowerupsScore ENDP
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-70
+
+
+				;----------------------------------------------
+				-----
+				;this procedure takes a 2 decimal places intege
+				r variable and parses it into a string
+				;@param				AL: the integer
+				 variable
+				;					SI: off
+				set of string
+				;@return			none
+ 0D58				ParseIntToString	PROC	NEAR
+									PUSHA
+ 0D58  50                    1	   push ax 
+ 0D59  51                    1	   push cx 
+ 0D5A  52                    1	   push dx 
+ 0D5B  53                    1	   push bx 
+ 0D5C  54                    1	   push sp 
+ 0D5D  55                    1	   push bp 
+ 0D5E  56                    1	   push si 
+ 0D5F  57                    1	   push di 
+				
+ 0D60  B4 00								MOV AH,
+				 0
+ 0D62  B1 0A								MOV CL,
+				10D
+ 0D64  F6 F1								DIV CL
+ 0D66  04 30								ADD AL,
+				30H
+ 0D68  88 04								MOV [SI
+				],AL
+ 0D6A  46								INC SI
+ 0D6B  80 C4 30								ADD AH,
+				30H
+ 0D6E  88 24								MOV [SI
+				],AH
+				
+									POPA
+ 0D70  5F                    1	   pop di 
+ 0D71  5E                    1	   pop si 
+ 0D72  5D                    1	   pop bp 
+ 0D73  5C                    1	   pop sp 
+ 0D74  5B                    1	   pop bx 
+ 0D75  5A                    1	   pop dx 
+ 0D76  59                    1	   pop cx 
+ 0D77  58                    1	   pop ax 
+ 0D78  C3								RET
+ 0D79				ParseIntToString	ENDP
+				;----------------------------------------------
+				-----
+				;This procedure copies data of the next piece t
+				o the current piece to draw it
+				;@params		SI: 0 for left screen,4
+				 for right screen
+				;@returns 		NONE
+ 0D79				CopyNextPieceData	PROC	NEAR
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-71
+
+
+									PUSHA
+ 0D79  50                    1	   push ax 
+ 0D7A  51                    1	   push cx 
+ 0D7B  52                    1	   push dx 
+ 0D7C  53                    1	   push bx 
+ 0D7D  54                    1	   push sp 
+ 0D7E  55                    1	   push bp 
+ 0D7F  56                    1	   push si 
+ 0D80  57                    1	   push di 
+									
+ 0D81  E8 0253 R							CALL Ge
+				tTempNextPiece
+ 0D84  8B 3E AA4F R							MOV DI,
+				tempNextPieceOffset
+				
+ 0D88  E8 0238 R							CALL Ge
+				tTempPiece
+ 0D8B  8B 36 AA10 R							MOV SI,
+				tempPieceOffset
+									
+ 0D8F  B9 0014								MOV CX,
+				20D
+									
+ 0D92  8A 05			CPY:				MOV AL,[DI]
+ 0D94  88 04								MOV [SI
+				],AL
+ 0D96  46								INC SI
+ 0D97  47								INC DI
+ 0D98  E2 F8								LOOP CP
+				Y
+									POPA
+ 0D9A  5F                    1	   pop di 
+ 0D9B  5E                    1	   pop si 
+ 0D9C  5D                    1	   pop bp 
+ 0D9D  5C                    1	   pop sp 
+ 0D9E  5B                    1	   pop bx 
+ 0D9F  5A                    1	   pop dx 
+ 0DA0  59                    1	   pop cx 
+ 0DA1  58                    1	   pop ax 
+ 0DA2  C3								RET
+ 0DA3				CopyNextPieceData	ENDP
+				;---------------------------
+				;This procedure draws the piece stored in temp 
+				piece
+				;in it's corresponding Data,(X,Y)
+				;@param			SI: screenId: 0 for lef
+				t, 4 for right
+				;@return		none
+ 0DA3				DrawNextPiece		PROC	NEAR
+									PUSHA
+ 0DA3  50                    1	   push ax 
+ 0DA4  51                    1	   push cx 
+ 0DA5  52                    1	   push dx 
+ 0DA6  53                    1	   push bx 
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-72
+
+
+ 0DA7  54                    1	   push sp 
+ 0DA8  55                    1	   push bp 
+ 0DA9  56                    1	   push si 
+ 0DAA  57                    1	   push di 
+ 0DAB  8B 1E AA4F R							MOV BX,
+				 tempNextPieceOffset
+ 0DAF  8B FB								MOV DI,
+				 BX					
+					;Load the piece 4x4 string address in p
+				ieceData
+ 0DB1  83 C7 04								ADD DI,
+					4				
+						;Go to the string data to put i
+				n DI
+ 0DB4  B9 0000								MOV CX,
+				 0D					
+					;iterate over the 16 cells of the piece
+									;if the
+				 piece has color !black, draw it with it's colo
+				r
+									;cell l
+				ocation is:
+									;cell_x
+				 = orig_x + id%4
+									;cell_y
+				 = orig_y + id/4
+ 0DB7				DRAWPIECELOPX1:			
+ 0DB7  8A 15								MOV DL,
+				 [DI]					;copy t
+				he byte of color of current cell into DL
+ 0DB9  80 FA 00								CMP DL,
+				 0D					
+					;check if color of current piece block 
+				is black
+ 0DBC  74 1B								JZ
+					 DRAWPIECEISBLACK1
+									
+ 0DBE  51								PUSH CX
+									
+ 0DBF  8B C1								MOV AX,
+				 CX
+ 0DC1  B1 04								MOV CL,
+				 4D
+ 0DC3  F6 F1								DIV CL
+									
+					;AH = id%4, AL = id/4
+ 0DC5  B9 0000								MOV CX,
+				 0
+ 0DC8  BA 0000								MOV DX,
+				 0
+ 0DCB  B1 0D								MOV CL,
+				 13				;load selected 
+				piece X into CL
+ 0DCD  B2 02								MOV DL,
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-73
+
+
+				 2				;load selected 
+				piece Y into DL
+ 0DCF  02 CC								ADD CL,
+				 AH					;CX = o
+				rig_x + id%4
+ 0DD1  02 D0								ADD DL,
+				 AL					;DX = o
+				rig_y + id/4
+									
+ 0DD3  8A 05								MOV AL,
+				 [DI]
+				
+ 0DD5  E8 01AE R							CALL Dr
+				awBlockClr
+									
+ 0DD8  59								POP  CX
+ 0DD9				DRAWPIECEISBLACK1:		
+ 0DD9  47								INC DI
+ 0DDA  41								INC CX
+ 0DDB  83 F9 10								CMP CX,
+				 16D
+ 0DDE  75 D7								JNZ DRA
+				WPIECELOPX1
+				
+				
+									POPA
+ 0DE0  5F                    1	   pop di 
+ 0DE1  5E                    1	   pop si 
+ 0DE2  5D                    1	   pop bp 
+ 0DE3  5C                    1	   pop sp 
+ 0DE4  5B                    1	   pop bx 
+ 0DE5  5A                    1	   pop dx 
+ 0DE6  59                    1	   pop cx 
+ 0DE7  58                    1	   pop ax 
+ 0DE8  C3								RET
+ 0DE9				DrawNextPiece		ENDP
+				;---------------------------
+				;This procedure clears the current temp piece (
+				used in changing direction or rotation)	;NEEDS 
+				TESTING
+				;@param			SI: screenId: 0 for lef
+				t, 4 for right
+				;@return		none
+ 0DE9				DeleteNextPiece		PROC	NEAR
+									PUSHA
+ 0DE9  50                    1	   push ax 
+ 0DEA  51                    1	   push cx 
+ 0DEB  52                    1	   push dx 
+ 0DEC  53                    1	   push bx 
+ 0DED  54                    1	   push sp 
+ 0DEE  55                    1	   push bp 
+ 0DEF  56                    1	   push si 
+ 0DF0  57                    1	   push di 
+ 0DF1  8B 1E AA4F R							MOV BX,
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-74
+
+
+				 tempNextPieceOffset
+ 0DF5  8B FB								MOV DI,
+				 BX					
+					;Load the piece 4x4 string address in p
+				ieceData
+ 0DF7  83 C7 04								ADD DI,
+					4				
+						;Go to the string data to put i
+				n DI
+ 0DFA  B9 0000								MOV CX,
+				 0D					
+					;iterate over the 16 cells of the piece
+									;if the
+				 piece has color !black, draw it with black
+									;cell l
+				ocation is:
+									;cell_x
+				 = orig_x + id%4
+									;cell_y
+				 = orig_y + id/4
+ 0DFD				LOPX1:			
+ 0DFD  8A 15								MOV DL,
+				 [DI]					;copy t
+				he byte of color of current cell into DL
+ 0DFF  80 FA 00								CMP DL,
+				 0D					
+					;check if color of current piece block 
+				is black
+ 0E02  74 1B								JZ 
+					ISBLACK1
+									
+ 0E04  51								PUSH CX
+									
+ 0E05  8B C1								MOV AX,
+				 CX
+ 0E07  B1 04								MOV CL,
+				 4D
+ 0E09  F6 F1								DIV CL
+									
+					;AH = id%4, AL = id/4
+ 0E0B  B9 0000								MOV CX,
+				 0
+ 0E0E  BA 0000								MOV DX,
+				 0
+ 0E11  B1 0D								MOV CL,
+				 13				;load selected 
+				piece X into CL
+ 0E13  B2 02								MOV DL,
+				 2				;load selected 
+				piece Y into DL
+ 0E15  02 CC								ADD CL,
+				 AH					;CX = o
+				rig_x + id%4
+ 0E17  02 D0								ADD DL,
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-75
+
+
+				 AL					;DX = o
+				rig_y + id/4
+									
+ 0E19  B0 00								MOV AL,
+				 0
+				
+ 0E1B  E8 01AE R							CALL Dr
+				awBlockClr
+									
+ 0E1E  59								POP  CX
+ 0E1F				ISBLACK1:		
+ 0E1F  41								INC CX
+ 0E20  47								INC DI
+ 0E21  83 F9 10								CMP CX,
+				 16D
+ 0E24  75 D7								JNZ LOP
+				X1
+									POPA
+ 0E26  5F                    1	   pop di 
+ 0E27  5E                    1	   pop si 
+ 0E28  5D                    1	   pop bp 
+ 0E29  5C                    1	   pop sp 
+ 0E2A  5B                    1	   pop bx 
+ 0E2B  5A                    1	   pop dx 
+ 0E2C  59                    1	   pop cx 
+ 0E2D  58                    1	   pop ax 
+ 0E2E  C3								RET
+ 0E2F				DeleteNextPiece		ENDP
+				;---------------------------
+				;This procedure checks if a player should get a
+				 powerup now, if he should, then add a random p
+				owerup to him
+				;@param				SI: 0 for playe
+				r1, 4 for player2
+				;@return			none
+ 0E2F				AddPowerupCheck		PROC	NEAR
+									PUSHA
+ 0E2F  50                    1	   push ax 
+ 0E30  51                    1	   push cx 
+ 0E31  52                    1	   push dx 
+ 0E32  53                    1	   push bx 
+ 0E33  54                    1	   push sp 
+ 0E34  55                    1	   push bp 
+ 0E35  56                    1	   push si 
+ 0E36  57                    1	   push di 
+ 0E37  83 FE 00								CMP SI,
+				 0
+ 0E3A  75 07								JNZ Pow
+				erupSIis4
+ 0E3C  8D 3E A810 R							LEA DI,
+				 Player1Score	;load offset playerscore1 into 
+				bx
+ 0E40  EB 05 90								JMP Pow
+				erupBreak
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-76
+
+
+ 0E43				PowerupSIis4:
+ 0E43  8D 3E A817 R							LEA DI,
+				 Player2Score	;load offset playerscore2 into 
+				bx
+ 0E47				PowerupBreak:
+ 0E47  B4 00								MOV AH,
+				 0
+ 0E49  8A 05								MOV AL,
+				 [DI]
+ 0E4B  B1 04								MOV CL,
+				 PowerupEveryPoint			;check 
+				if score is divisible by powerupPoints
+ 0E4D  F6 F1								DIV CL
+									;divide
+				 score by CL, check if it is divisible by it
+ 0E4F  80 FC 00								CMP AH,
+				 0
+ 0E52  75 1A								JNZ NoP
+				owerUp
+ 0E54  3C 00								CMP AL,
+				 0
+ 0E56  74 16								JZ  NoP
+				owerUp
+ 0E58  BB 0005								MOV BX,
+				 5				;number of powe
+				rups
+ 0E5B  E8 082B R							CALL Ge
+				nerateRandomNumber
+									;bl now
+				 has a random number from 0 to 4 inclusive
+									;MOV le
+				ftPowerupFreezeCount, BL
+ 0E5E  03 FB								ADD DI,
+				 BX
+ 0E60  47								INC DI
+									;moves 
+				DI to rand_number+1
+ 0E61  B3 01								MOV BL,
+				 1
+ 0E63  00 1D								ADD [DI
+				], BL			;increases the number o
+				f that powerup
+ 0E65  E8 0D47 R							CALL Up
+				datePowerupsScore
+				
+ 0E68  B4 02								MOV AH,
+				 2				;create beep so
+				und
+ 0E6A  B2 07								MOV DL,
+				 7
+ 0E6C  CD 21								INT 21H
+				
+ 0E6E				NoPowerUp:
+									POPA
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-77
+
+
+ 0E6E  5F                    1	   pop di 
+ 0E6F  5E                    1	   pop si 
+ 0E70  5D                    1	   pop bp 
+ 0E71  5C                    1	   pop sp 
+ 0E72  5B                    1	   pop bx 
+ 0E73  5A                    1	   pop dx 
+ 0E74  59                    1	   pop cx 
+ 0E75  58                    1	   pop ax 
+ 0E76  C3								RET
+ 0E77				AddPowerupCheck		ENDP
+				;---------------------------
+				;This procedure removes four lines from a given
+				 screen
+				;@param			SI: screenId: 0 for lef
+				t, 4 for right
+				;@return		none
+ 0E77				RemoveFourLines		PROC	NEAR
+						PUSHA
+ 0E77  50                    1	   push ax 
+ 0E78  51                    1	   push cx 
+ 0E79  52                    1	   push dx 
+ 0E7A  53                    1	   push bx 
+ 0E7B  54                    1	   push sp 
+ 0E7C  55                    1	   push bp 
+ 0E7D  56                    1	   push si 
+ 0E7E  57                    1	   push di 
+						
+ 0E7F  B9 0004					MOV CX,4		
+									
+						;number of lines to be removed
+						
+						;get the last row in the grid
+ 0E82  BA 0014					MOV DX, FRAMEHEIGHT	
+						
+ 0E85  4A					DEC DX
+				
+ 0E86  E8 0238 R				CALL GetTempPiece
+ 0E89  E8 026E R				CALL DeletePiece
+				
+ 0E8C				RemoveFourLinesLoop: 
+ 0E8C  E8 08CF R				CALL ShiftLinesDown	
+									
+									
+					;go to next line
+ 0E8F  E2 FB					LOOP RemoveFourLinesLoop
+						
+ 0E91  E8 02B6 R				CALL DrawPiece
+				
+						POPA
+ 0E94  5F                    1	   pop di 
+ 0E95  5E                    1	   pop si 
+ 0E96  5D                    1	   pop bp 
+ 0E97  5C                    1	   pop sp 
+ 0E98  5B                    1	   pop bx 
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-78
+
+
+ 0E99  5A                    1	   pop dx 
+ 0E9A  59                    1	   pop cx 
+ 0E9B  58                    1	   pop ax 
+ 0E9C  C3					RET
+ 0E9D				RemoveFourLines		ENDP
+				;---------------------------
+				;This procedure speeds up the block speed at th
+				e opponent
+				;@param			SI: screenId of the cal
+				ling player: 0 will affect the right screen, 4 
+				will affect the left screen
+				;@return		none
+ 0E9D				SpeedUpOpponentPiece		PROC	NEAR
+						PUSHA
+ 0E9D  50                    1	   push ax 
+ 0E9E  51                    1	   push cx 
+ 0E9F  52                    1	   push dx 
+ 0EA0  53                    1	   push bx 
+ 0EA1  54                    1	   push sp 
+ 0EA2  55                    1	   push bp 
+ 0EA3  56                    1	   push si 
+ 0EA4  57                    1	   push di 
+						
+ 0EA5  83 FE 04					CMP SI, 4		
+									;if it 
+				is called by the right player
+ 0EA8  74 0E					JZ SpeedUpLeftPlayer	;increa
+				se left player piece speed
+				
+ 0EAA					SpeedUpRightPlayer:
+ 0EAA  C6 06 AA0F R 02				MOV rightPieceSpeed, 2
+						POPA
+ 0EAF  5F                    1	   pop di 
+ 0EB0  5E                    1	   pop si 
+ 0EB1  5D                    1	   pop bp 
+ 0EB2  5C                    1	   pop sp 
+ 0EB3  5B                    1	   pop bx 
+ 0EB4  5A                    1	   pop dx 
+ 0EB5  59                    1	   pop cx 
+ 0EB6  58                    1	   pop ax 
+ 0EB7  C3					RET	
+				
+ 0EB8					SpeedUpLeftPlayer:
+ 0EB8  C6 06 A9FA R 02				MOV leftPieceSpeed, 2
+						POPA
+ 0EBD  5F                    1	   pop di 
+ 0EBE  5E                    1	   pop si 
+ 0EBF  5D                    1	   pop bp 
+ 0EC0  5C                    1	   pop sp 
+ 0EC1  5B                    1	   pop bx 
+ 0EC2  5A                    1	   pop dx 
+ 0EC3  59                    1	   pop cx 
+ 0EC4  58                    1	   pop ax 
+ 0EC5  C3					RET
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-79
+
+
+				
+ 0EC6				SpeedUpOpponentPiece		ENDP
+				;---------------------------
+				;This procedure reset the speed of the piece  t
+				o its original speed
+				;@param			SI: screenId 0 for left
+				, 4 for right
+				;@return		none
+ 0EC6				ResetPieceSpeed		PROC	NEAR
+						PUSHA
+ 0EC6  50                    1	   push ax 
+ 0EC7  51                    1	   push cx 
+ 0EC8  52                    1	   push dx 
+ 0EC9  53                    1	   push bx 
+ 0ECA  54                    1	   push sp 
+ 0ECB  55                    1	   push bp 
+ 0ECC  56                    1	   push si 
+ 0ECD  57                    1	   push di 
+						
+ 0ECE  83 FE 04					CMP SI, 4		
+								;check which sc
+				reen to reset its piece speed
+ 0ED1  74 11					JZ ResetRightSpeed	
+				
+ 0ED3					ResetLeftSpeed:
+ 0ED3  8A 0E A9FA R				MOV CL, leftPieceSpeed
+ 0ED7  80 F9 01					CMP CL,1
+ 0EDA  74 16					JZ BreakResetPieceSpeed
+ 0EDC  C6 06 A9FA R 01				MOV leftPieceSpeed, 1	;set th
+				e piece speed to  1
+ 0EE1  EB 0F 90					JMP BreakResetPieceSpeed
+				
+ 0EE4					ResetRightSpeed:
+ 0EE4  8A 0E AA0F R				MOV CL, rightPieceSpeed
+ 0EE8  80 F9 01					CMP CL,1
+ 0EEB  74 05					JZ BreakResetPieceSpeed
+ 0EED  C6 06 AA0F R 01				MOV rightPieceSpeed, 1	;set th
+				e piece speed to  1
+				
+ 0EF2					BreakResetPieceSpeed:
+						POPA
+ 0EF2  5F                    1	   pop di 
+ 0EF3  5E                    1	   pop si 
+ 0EF4  5D                    1	   pop bp 
+ 0EF5  5C                    1	   pop sp 
+ 0EF6  5B                    1	   pop bx 
+ 0EF7  5A                    1	   pop dx 
+ 0EF8  59                    1	   pop cx 
+ 0EF9  58                    1	   pop ax 
+ 0EFA  C3					RET
+				
+ 0EFB				ResetPieceSpeed		ENDP
+				;---------------------------
+				;This procedure freeze the rotation for the opp
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-80
+
+
+				onent
+				;@param			SI: screenId of the cal
+				ling player 0: will affect the right screen 4: 
+				will affect the left screen
+				;@return		none
+ 0EFB				FreezeRotation		PROC	NEAR
+						PUSHA
+ 0EFB  50                    1	   push ax 
+ 0EFC  51                    1	   push cx 
+ 0EFD  52                    1	   push dx 
+ 0EFE  53                    1	   push bx 
+ 0EFF  54                    1	   push sp 
+ 0F00  55                    1	   push bp 
+ 0F01  56                    1	   push si 
+ 0F02  57                    1	   push di 
+						
+ 0F03  83 FE 04					CMP SI, 4		
+								;if it is calle
+				d by right screen freeze left piece
+ 0F06  74 0E					JZ FreezeRotationLeftPiece
+					
+				
+ 0F08					FreezeRotationRightPiece:
+ 0F08  C6 06 A81D R 01				MOV rightPieceRotationLock, 1 ;
+				set the piece speed to  1
+						POPA
+ 0F0D  5F                    1	   pop di 
+ 0F0E  5E                    1	   pop si 
+ 0F0F  5D                    1	   pop bp 
+ 0F10  5C                    1	   pop sp 
+ 0F11  5B                    1	   pop bx 
+ 0F12  5A                    1	   pop dx 
+ 0F13  59                    1	   pop cx 
+ 0F14  58                    1	   pop ax 
+ 0F15  C3					RET
+				
+ 0F16					FreezeRotationLeftPiece:
+ 0F16  C6 06 A816 R 01				MOV leftPieceRotationLock, 1
+					;set the piece speed to  1
+						POPA
+ 0F1B  5F                    1	   pop di 
+ 0F1C  5E                    1	   pop si 
+ 0F1D  5D                    1	   pop bp 
+ 0F1E  5C                    1	   pop sp 
+ 0F1F  5B                    1	   pop bx 
+ 0F20  5A                    1	   pop dx 
+ 0F21  59                    1	   pop cx 
+ 0F22  58                    1	   pop ax 
+ 0F23  C3					RET
+				
+ 0F24				FreezeRotation		ENDP
+				;---------------------------
+				;This procedure unfreeze the rotation for speci
+				fic screen 
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-81
+
+
+				;@param			SI: screenId 0: left 4:
+				 right
+				;@return		none
+ 0F24				UnfreezeRotation		PROC	NEAR
+						PUSHA
+ 0F24  50                    1	   push ax 
+ 0F25  51                    1	   push cx 
+ 0F26  52                    1	   push dx 
+ 0F27  53                    1	   push bx 
+ 0F28  54                    1	   push sp 
+ 0F29  55                    1	   push bp 
+ 0F2A  56                    1	   push si 
+ 0F2B  57                    1	   push di 
+						
+ 0F2C  83 FE 04					CMP SI, 4		
+								;if it is calle
+				d by right screen freeze left piece
+ 0F2F  74 11					JZ UnfreezeRightScreen	
+				
+ 0F31					UnfreezeLeftScreen:
+ 0F31  8A 0E A816 R				MOV CL, leftPieceRotationLock
+					;get the lock variable
+ 0F35  80 F9 00					CMP CL, 0		
+									
+									
+							
+ 0F38  74 16					JZ BreakUnfreezeRotation
+							
+ 0F3A  C6 06 A816 R 00				MOV leftPieceRotationLock, 0
+					;reset lock variable to 0 if it wasn't
+ 0F3F  EB 0F 90					JMP BreakUnfreezeRotation
+				
+ 0F42					UnfreezeRightScreen:
+ 0F42  8A 0E A81D R				MOV CL, rightPieceRotationLock
+					;get the lock variable
+ 0F46  80 F9 00					CMP CL, 0		
+									
+									
+							
+ 0F49  74 05					JZ BreakUnfreezeRotation
+							
+ 0F4B  C6 06 A81D R 00				MOV rightPieceRotationLock, 0
+					;reset lock variable to 0 if it wasn't
+						
+ 0F50					BreakUnfreezeRotation:
+						POPA
+ 0F50  5F                    1	   pop di 
+ 0F51  5E                    1	   pop si 
+ 0F52  5D                    1	   pop bp 
+ 0F53  5C                    1	   pop sp 
+ 0F54  5B                    1	   pop bx 
+ 0F55  5A                    1	   pop dx 
+ 0F56  59                    1	   pop cx 
+ 0F57  58                    1	   pop ax 
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-82
+
+
+ 0F58  C3					RET
+				
+ 0F59				UnfreezeRotation		ENDP
+				;---------------------------
+				;This procedure changes the current piece of th
+				e player
+				;@param				SI: 0 for left 
+				player, 4 for right player
+				;@return			none
+ 0F59				ChangePiece			PROC 	NEAR
+									PUSHA
+ 0F59  50                    1	   push ax 
+ 0F5A  51                    1	   push cx 
+ 0F5B  52                    1	   push dx 
+ 0F5C  53                    1	   push bx 
+ 0F5D  54                    1	   push sp 
+ 0F5E  55                    1	   push bp 
+ 0F5F  56                    1	   push si 
+ 0F60  57                    1	   push di 
+ 0F61  E8 0238 R							CALL Ge
+				tTempPiece
+ 0F64  E8 026E R							CALL De
+				letePiece
+ 0F67  E8 07DC R							CALL Ge
+				nerateRandomPiece
+									POPA
+ 0F6A  5F                    1	   pop di 
+ 0F6B  5E                    1	   pop si 
+ 0F6C  5D                    1	   pop bp 
+ 0F6D  5C                    1	   pop sp 
+ 0F6E  5B                    1	   pop bx 
+ 0F6F  5A                    1	   pop dx 
+ 0F70  59                    1	   pop cx 
+ 0F71  58                    1	   pop ax 
+ 0F72  C3								RET
+ 0F73				ChangePiece			ENDP
+				;---------------------------
+				;This procedure adds two lines at the opposite 
+				player
+				;@param				SI: 0 for left 
+				player, 4 for right player
+				;@return			none
+ 0F73				InsertTwoLines		PROC	NEAR
+									PUSHA
+ 0F73  50                    1	   push ax 
+ 0F74  51                    1	   push cx 
+ 0F75  52                    1	   push dx 
+ 0F76  53                    1	   push bx 
+ 0F77  54                    1	   push sp 
+ 0F78  55                    1	   push bp 
+ 0F79  56                    1	   push si 
+ 0F7A  57                    1	   push di 
+ 0F7B  83 FE 00								CMP SI,
+				 0				;invert SI from
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-83
+
+
+				 0 to 4 or from 4 to 0
+ 0F7E  75 06								JNZ
+					AddTwoLinesSIis4
+ 0F80  BE 0004								MOV SI,
+				 4
+ 0F83  EB 04 90								JMP Add
+				TwoLinesBreak
+ 0F86				AddTwoLinesSIis4:
+ 0F86  BE 0000								MOV SI,
+				 0
+ 0F89				AddTwoLinesBreak:
+ 0F89  E8 0908 R							CALL In
+				sertLine			;insert two lin
+				es
+ 0F8C  E8 0908 R							CALL In
+				sertLine
+				
+									POPA
+ 0F8F  5F                    1	   pop di 
+ 0F90  5E                    1	   pop si 
+ 0F91  5D                    1	   pop bp 
+ 0F92  5C                    1	   pop sp 
+ 0F93  5B                    1	   pop bx 
+ 0F94  5A                    1	   pop dx 
+ 0F95  59                    1	   pop cx 
+ 0F96  58                    1	   pop ax 
+ 0F97  C3								RET
+ 0F98				InsertTwoLines		ENDP
+				;---------------------------
+				; OpenFile 	PROC 	NEAR
+				
+				;     ; Open file
+				
+				; 	;JNC SUCCESS
+				; 	;MOV AH, 4CH
+				; 	;INT 21H
+				; ;SUCCESS:
+				
+				;     MOV AH, 3Dh
+				;     MOV AL, 0 ; read only
+				;     LEA DX, LeftFrameTopFilename
+				;     INT 21h
+				;     MOV [LeftFrameTopFilehandle], AX
+				
+					; MOV AH, 3Dh
+				    ; MOV AL, 0 ; read only
+				    ; LEA DX, LeftFrameLeftFilename
+				    ; INT 21h
+				    ; MOV [LeftFrameLeftFilehandle], AX
+				
+				; 	MOV AH, 3Dh
+				;     MOV AL, 0 ; read only
+				;     LEA DX, LeftFrameRightFilename
+				;     INT 21h
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-84
+
+
+				;     MOV [LeftFrameRightFilehandle], AX
+				
+				; 	MOV AH, 3Dh
+				;     MOV AL, 0 ; read only
+				;     LEA DX, LeftFrameBottomFilename
+				;     INT 21h
+				;     MOV [LeftFrameBottomFilehandle], AX
+				
+				; 	; MOV AH, 3Dh
+				;     ; MOV AL, 0 ; read only
+				;     ; LEA DX, rightFrameTopFilename
+				;     ; INT 21h
+				;     ; MOV [rightFrameTopFilehandle], AX
+				
+				; 	; MOV AH, 3Dh
+				;     ; MOV AL, 0 ; read only
+				;     ; LEA DX, rightFrameLeftFilename
+				;     ; INT 21h
+				;     ; MOV [rightFrameLeftFilehandle], AX
+				
+				; 	; MOV AH, 3Dh
+				;     ; MOV AL, 0 ; read only
+				;     ; LEA DX, rightFrameRightFilename
+				;     ; INT 21h
+				;     ; MOV [rightFrameRightFilehandle], AX
+				
+				; 	; MOV AH, 3Dh
+				;     ; MOV AL, 0 ; read only
+				;     ; LEA DX, rightFrameBottomFilename
+				;     ; INT 21h
+				;     ; MOV [rightFrameBottomFilehandle], AX
+				   
+				   
+				;     RET
+				; OpenFile 	ENDP
+				; ;---------------------------
+				; ReadData 	PROC	NEAR
+				;     MOV AH,3Fh
+				;     MOV BX, [LeftFrameTopFilehandle]
+				;     MOV CX, leftFrameTopWidth*leftFrameTopHei
+				ght ; number of bytes to read
+				;     LEA DX, leftFrameTopData
+				;     INT 21h
+				
+				    ; MOV AH,3Fh
+				    ; MOV BX, [LeftFrameLeftFilehandle]
+				    ; MOV CX, leftFrameLeftWidth*leftFrameLeftH
+				eight ; number of bytes to read
+				    ; LEA DX, leftFrameLeftData
+				    ; INT 21h
+				
+				;     MOV AH,3Fh
+				;     MOV BX, [LeftFrameRightFilehandle]
+				;     MOV CX, leftFrameRightWidth*leftFrameRigh
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-85
+
+
+				tHeight ; number of bytes to read
+				;     LEA DX, leftFrameRightData
+				;     INT 21h
+				
+				;     MOV AH,3Fh
+				;     MOV BX, [LeftFrameBottomFilehandle]
+				;     MOV CX, leftFrameBottomWidth*leftFrameBot
+				tomHeight ; number of bytes to read
+				;     LEA DX, leftFrameBottomData
+				;     INT 21h
+				
+				; 	; MOV AH,3Fh
+				;     ; MOV BX, [rightFrameTopFilehandle]
+				;     ; MOV CX, rightFrameTopWidth*rightFrameTo
+				pHeight ; number of bytes to read
+				;     ; LEA DX, rightFrameTopData
+				;     ; INT 21h
+				
+				;     ; MOV AH,3Fh
+				;     ; MOV BX, [rightFrameLeftFilehandle]
+				;     ; MOV CX, rightFrameLeftWidth*rightFrameL
+				eftHeight ; number of bytes to read
+				;     ; LEA DX, rightFrameLeftData
+				;     ; INT 21h
+				
+				;     ; MOV AH,3Fh
+				;     ; MOV BX, [rightFrameRightFilehandle]
+				;     ; MOV CX, rightFrameRightWidth*rightFrame
+				RightHeight ; number of bytes to read
+				;     ; LEA DX, rightFrameRightData
+				;     ; INT 21h
+				
+				;     ; MOV AH,3Fh
+				;     ; MOV BX, [rightFrameBottomFilehandle]
+				;     ; MOV CX, rightFrameBottomWidth*rightFram
+				eBottomHeight ; number of bytes to read
+				;     ; LEA DX, rightFrameBottomData
+				;     ; INT 21h
+				
+				
+				;     RET
+				; ReadData	ENDP 
+				; ;---------------------------
+				; CloseFile 	PROC	NEAR
+				; 	MOV AH, 3Eh
+				; 	MOV BX, [leftFrameTopFilehandle]
+				; 	INT 21h
+				
+					; MOV AH, 3Eh
+					; MOV BX, [leftFrameLeftFilehandle]
+					; INT 21h
+				
+				; 	MOV AH, 3Eh
+				; 	MOV BX, [leftFrameRightFilehandle]
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-86
+
+
+				; 	INT 21h
+				
+				; 	MOV AH, 3Eh
+				; 	MOV BX, [leftFrameBottomFilehandle]
+				; 	INT 21h
+				
+				; 	; MOV AH, 3Eh
+				; 	; MOV BX, [rightFrameTopFilehandle]
+				; 	; INT 21h
+				
+				; 	; MOV AH, 3Eh
+				; 	; MOV BX, [rightFrameLeftFilehandle]
+				; 	; INT 21h
+				
+				; 	; MOV AH, 3Eh
+				; 	; MOV BX, [rightFrameRightFilehandle]
+				; 	; INT 21h
+				
+				; 	; MOV AH, 3Eh
+				; 	; MOV BX, [rightFrameBottomFilehandle]
+				; 	; INT 21h
+				
+				
+				; 	RET
+				; CloseFile 	ENDP
+				;---------------------------
+				;
+				;
+ 0F98				DrawLeftBorder	PROC	NEAR
+				
+					;------------ice bottom-------------
+				
+					;open file
+ 0F98  B4 3D				MOV AH, 3Dh
+ 0F9A  B0 00				MOV AL, 0 ; read only
+ 0F9C  8D 16 002A R			LEA DX, LeftFrameBottomFilename
+ 0FA0  CD 21				INT 21h
+ 0FA2  A3 0035 R			MOV [LeftFrameBottomFilehandle], AX
+				
+					;read file
+ 0FA5  B4 3F				MOV AH,3Fh
+ 0FA7  8B 1E 0035 R			MOV BX, [LeftFrameBottomFilehandle]
+ 0FAB  B9 298E				MOV CX, leftFrameBottomWidth*leftFrameB
+				ottomHeight ; number of bytes to read
+ 0FAE  8D 16 006E R			LEA DX, WideFrameData
+ 0FB2  CD 21				INT 21h
+				
+					;close file
+ 0FB4  B4 3E				MOV AH, 3Eh
+ 0FB6  8B 1E 0035 R			MOV BX, [leftFrameBottomFilehandle]
+ 0FBA  CD 21				INT 21h
+				
+					;drawing ice Bottom
+				
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-87
+
+
+ 0FBC  8D 1E 006E R			LEA BX, WideFrameData ; BL contains ind
+				ex at the current drawn pixel
+					
+ 0FC0  B9 0065				MOV CX, leftFrameBottomX
+ 0FC3  BA 01C3				MOV DX, leftFrameBottomY
+ 0FC6  B4 0C				MOV AH, 0ch
+				
+ 0FC8					drawIceBottom:
+ 0FC8  8A 07					MOV AL,[BX]
+ 0FCA  CD 10					INT 10h 
+ 0FCC  41					INC CX
+ 0FCD  43					INC BX
+ 0FCE  81 F9 012A				CMP CX, leftFrameBottomWidth + 
+				leftFrameBottomX
+ 0FD2  75 F4				JNE drawIceBottom 
+ 0FD4  B9 0065					MOV CX , leftFrameBottomX
+ 0FD7  42					INC DX
+ 0FD8  81 FA 01F9				CMP DX, leftFrameBottomHeight +
+				 leftFrameBottomY
+ 0FDC  75 EA				JNE drawIceBottom
+				
+				
+					;------------ice top-------------
+				
+					;open file
+ 0FDE  B4 3D				MOV AH, 3Dh
+ 0FE0  B0 00				MOV AL, 0 ; read only
+ 0FE2  8D 16 0000 R			LEA DX, LeftFrameTopFilename
+ 0FE6  CD 21				INT 21h
+ 0FE8  A3 000B R			MOV [LeftFrameTopFilehandle], AX
+				
+					;read file
+ 0FEB  B4 3F				MOV AH,3Fh
+ 0FED  8B 1E 000B R			MOV BX, [LeftFrameTopFilehandle]
+ 0FF1  B9 2E32				MOV CX, leftFrameTopWidth*leftFrameTopH
+				eight ; number of bytes to read
+ 0FF4  8D 16 006E R			LEA DX, WideFrameData
+ 0FF8  CD 21				INT 21h
+				
+					;close file
+ 0FFA  B4 3E				MOV AH, 3Eh
+ 0FFC  8B 1E 000B R			MOV BX, [leftFrameTopFilehandle]
+ 1000  CD 21				INT 21h
+				
+					;draw ice top
+ 1002  8D 1E 006E R			LEA BX, WideFrameData ; BL contains ind
+				ex at the current drawn pixel
+ 1006  B9 005A				MOV CX, leftFrameTopX
+ 1009  BA 0000				MOV DX, leftFrameTopY
+ 100C  B4 0C				MOV AH, 0ch
+ 100E					drawIceTop:
+ 100E  8A 07					MOV AL,[BX]
+ 1010  CD 10					INT 10h 
+ 1012  41					INC CX
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-88
+
+
+ 1013  43					INC BX
+ 1014  81 F9 0135				CMP CX, leftFrameTopWidth + lef
+				tFrameTopX
+ 1018  75 F4				JNE drawIceTop 
+						
+ 101A  B9 005A					MOV CX , leftFrameTopX
+ 101D  42					INC DX
+ 101E  83 FA 36					CMP DX, leftFrameTopHeight + le
+				ftFrameTopY
+ 1021  75 EB				JNE drawIceTop
+				
+					;------------ice left-------------
+				
+					;open file
+ 1023  B4 3D			    MOV AH, 3Dh
+ 1025  B0 00			    MOV AL, 0 ; read only
+ 1027  8D 16 000D R		    LEA DX, LeftFrameLeftFilename
+ 102B  CD 21			    INT 21h
+				     
+ 102D  A3 0019 R		    MOV [LeftFrameLeftFilehandle], AX
+				
+					;read file
+ 1030  B4 3F			    MOV AH,3Fh
+ 1032  8B 1E 0019 R		    MOV BX, [LeftFrameLeftFilehandle]
+ 1036  B9 54DE			    MOV CX, leftFrameLeftWidth*leftFrameLeftHei
+				ght ; number of bytes to read
+ 1039  8D 16 3B06 R		    LEA DX, TallFrameData
+ 103D  CD 21			    INT 21h
+				
+					;close file
+ 103F  B4 3E				MOV AH, 3Eh
+ 1041  8B 1E 0019 R			MOV BX, [leftFrameLeftFilehandle]
+ 1045  CD 21				INT 21h
+				
+					;drawing ice Left
+ 1047  8D 1E 3B06 R			LEA BX, TallFrameData ; BL contains ind
+				ex at the current drawn pixel
+ 104B  B9 0033				MOV CX, leftFrameLeftX
+ 104E  BA 0036				MOV DX, leftFrameLeftY
+ 1051  B4 0C				MOV AH, 0ch
+					
+ 1053					drawIceLeft:
+ 1053  8A 07					MOV AL,[BX]
+ 1055  CD 10					INT 10h 
+ 1057  41					INC CX
+ 1058  43					INC BX
+ 1059  83 F9 66					CMP CX, leftFrameLeftWidth + le
+				ftFrameLeftX
+ 105C  75 F5				JNE drawIceLeft 
+						
+ 105E  B9 0033					MOV CX , leftFrameLeftX
+ 1061  42					INC DX
+ 1062  81 FA 01E0				CMP DX, leftFrameLeftHeight + l
+				eftFrameLeftY
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-89
+
+
+ 1066  75 EB				JNE drawIceLeft
+					
+					;------------ice right-------------
+				
+					;open file
+ 1068  B4 3D				MOV AH, 3Dh
+ 106A  B0 00				MOV AL, 0 ; read only
+ 106C  8D 16 001B R			LEA DX, LeftFrameRightFilename
+ 1070  CD 21				INT 21h
+ 1072  A3 0028 R			MOV [LeftFrameRightFilehandle], AX
+				
+					;read file
+ 1075  B4 3F				MOV AH,3Fh
+ 1077  8B 1E 0028 R			MOV BX, [LeftFrameRightFilehandle]
+ 107B  B9 478E				MOV CX, leftFrameRightWidth*leftFrameRi
+				ghtHeight ; number of bytes to read
+ 107E  8D 16 3B06 R			LEA DX, TallFrameData
+ 1082  CD 21				INT 21h
+				
+					;close file
+ 1084  B4 3E				MOV AH, 3Eh
+ 1086  8B 1E 0028 R			MOV BX, [leftFrameRightFilehandle]
+ 108A  CD 21				INT 21h
+					
+					;drawing ice Right
+ 108C  8D 1E 3B06 R			LEA BX, TallFrameData	 ; BL contains 
+				index at the current drawn pixel
+ 1090  B9 0129				MOV CX, leftFrameRightX
+ 1093  BA 0036				MOV DX, leftFrameRightY
+ 1096  B4 0C				MOV AH, 0ch
+				
+ 1098					drawIceRight:
+ 1098  8A 07					MOV AL,[BX]
+ 109A  CD 10					INT 10h 
+ 109C  41					INC CX
+ 109D  43					INC BX
+ 109E  81 F9 0154				CMP CX, leftFrameRightWidth + l
+				eftFrameRightX
+ 10A2  75 F4				JNE drawIceRight 
+						
+ 10A4  B9 0129					MOV CX , leftFrameRightX
+ 10A7  42					INC DX
+ 10A8  81 FA 01E0				CMP DX, leftFrameRightHeight + 
+				leftFrameRightY
+ 10AC  75 EA				JNE drawIceRight
+				
+					;------------done-------------
+				
+ 10AE  C3							RET
+ 10AF				DrawLeftBorder	ENDP
+				;-------------------------
+ 10AF				DrawRightBorder	PROC	NEAR
+				
+					;------------fire top-------------
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-90
+
+
+				
+					;open file
+ 10AF  B4 3D				MOV AH, 3Dh
+ 10B1  B0 00				MOV AL, 0 ; read only
+ 10B3  8D 16 0037 R			LEA DX, RightFrameTopFilename
+ 10B7  CD 21				INT 21h
+ 10B9  A3 0043 R			MOV [RightFrameTopFilehandle], AX
+				
+					;read file
+ 10BC  B4 3F				MOV AH,3Fh
+ 10BE  8B 1E 0043 R			MOV BX, [RightFrameTopFilehandle]
+ 10C2  B9 3358				MOV CX, RightFrameTopWidth*RightFrameTo
+				pHeight ; number of bytes to read
+ 10C5  8D 16 006E R			LEA DX, WideFrameData
+ 10C9  CD 21				INT 21h
+				
+					;close file
+ 10CB  B4 3E				MOV AH, 3Eh
+ 10CD  8B 1E 0043 R			MOV BX, [RightFrameTopFilehandle]
+ 10D1  CD 21				INT 21h
+				
+					;draw fire top
+ 10D3  8D 1E 006E R			LEA BX, WideFrameData ; BL contains ind
+				ex at the current drawn pixel
+ 10D7  B9 0240				MOV CX, RightFrameTopX
+ 10DA  BA 0001				MOV DX, RightFrameTopY
+ 10DD  B4 0C				MOV AH, 0ch
+ 10DF					drawfireTop:
+ 10DF  8A 07					MOV AL,[BX]
+ 10E1  CD 10					INT 10h 
+ 10E3  41					INC CX
+ 10E4  43					INC BX
+ 10E5  81 F9 0338				CMP CX, RightFrameTopWidth + Ri
+				ghtFrameTopX
+ 10E9  75 F4				JNE drawfireTop 
+						
+ 10EB  B9 0240					MOV CX , RightFrameTopX
+ 10EE  42					INC DX
+ 10EF  83 FA 36					CMP DX, RightFrameTopHeight + R
+				ightFrameTopY
+ 10F2  75 EB				JNE drawfireTop
+				
+					;CLEAR BUFFER
+				
+					;CALL ClearWideBuffer
+				
+					;------------fire bottom-------------
+				
+					;open file
+ 10F4  B4 3D				MOV AH, 3Dh
+ 10F6  B0 00				MOV AL, 0 ; read only
+ 10F8  8D 16 0060 R			LEA DX, RightFrameBottomFilename
+ 10FC  CD 21				INT 21h
+ 10FE  A3 006C R			MOV [RightFrameBottomFilehandle], AX
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-91
+
+
+				
+					;read file
+ 1101  B4 3F				MOV AH,3Fh
+ 1103  8B 1E 006C R			MOV BX, [RightFrameBottomFilehandle]
+ 1107  B9 30F9				MOV CX, RightFrameBottomWidth*RightFram
+				eBottomHeight ; number of bytes to read
+ 110A  8D 16 006E R			LEA DX, WideFrameData
+ 110E  CD 21				INT 21h
+				
+					;close file
+ 1110  B4 3E				MOV AH, 3Eh
+ 1112  8B 1E 006C R			MOV BX, [RightFrameBottomFilehandle]
+ 1116  CD 21				INT 21h
+				
+					;drawing fire Bottom
+				
+ 1118  8D 1E 006E R			LEA BX, WideFrameData ; BL contains ind
+				ex at the current drawn pixel
+					
+ 111C  B9 0256				MOV CX, RightFrameBottomX
+ 111F  BA 01C4				MOV DX, RightFrameBottomY
+ 1122  B4 0C				MOV AH, 0ch
+				
+ 1124					drawfireBottom:
+ 1124  8A 07					MOV AL,[BX]
+ 1126  CD 10					INT 10h 
+ 1128  41					INC CX
+ 1129  43					INC BX
+ 112A  81 F9 031D				CMP CX, RightFrameBottomWidth +
+				 RightFrameBottomX
+ 112E  75 F4				JNE drawfireBottom 
+ 1130  B9 0256					MOV CX , RightFrameBottomX
+ 1133  42					INC DX
+ 1134  81 FA 0203				CMP DX, RightFrameBottomHeight 
+				+ RightFrameBottomY
+ 1138  75 EA				JNE drawfireBottom
+				
+				
+				
+					;------------fire left-------------
+				
+					;open file
+ 113A  B4 3D			    MOV AH, 3Dh
+ 113C  B0 00			    MOV AL, 0 ; read only
+ 113E  8D 16 0045 R		    LEA DX, RightFrameLeftFilename
+ 1142  CD 21			    INT 21h
+				     
+ 1144  A3 0052 R		    MOV [RightFrameLeftFilehandle], AX
+				
+					;read file
+ 1147  B4 3F			    MOV AH,3Fh
+ 1149  8B 1E 0052 R		    MOV BX, [RightFrameLeftFilehandle]
+ 114D  B9 495A			    MOV CX, RightFrameLeftWidth*RightFrameLeftH
+				eight ; number of bytes to read
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-92
+
+
+ 1150  8D 16 3B06 R		    LEA DX, TallFrameData
+ 1154  CD 21			    INT 21h
+				
+					;close file
+ 1156  B4 3E				MOV AH, 3Eh
+ 1158  8B 1E 0052 R			MOV BX, [RightFrameLeftFilehandle]
+ 115C  CD 21				INT 21h
+				
+					;drawing fire Left
+ 115E  8D 1E 3B06 R			LEA BX, TallFrameData ; BL contains ind
+				ex at the current drawn pixel
+ 1162  B9 0231				MOV CX, RightFrameLeftX
+ 1165  BA 0036				MOV DX, RightFrameLeftY
+ 1168  B4 0C				MOV AH, 0ch
+					
+				
+ 116A					drawfireLeft:
+ 116A  8A 07					MOV AL,[BX]
+ 116C  CD 10					INT 10h 
+ 116E  41					INC CX
+ 116F  43					INC BX
+ 1170  81 F9 025A				CMP CX, RightFrameLeftWidth + R
+				ightFrameLeftX
+ 1174  75 F4				JNE drawfireLeft 
+						
+ 1176  B9 0231					MOV CX , RightFrameLeftX
+ 1179  42					INC DX
+ 117A  81 FA 0200				CMP DX, RightFrameLeftHeight + 
+				RightFrameLeftY
+ 117E  75 EA				JNE drawfireLeft
+					
+					;------------fire right-------------
+				
+					;open file
+ 1180  B4 3D				MOV AH, 3Dh
+ 1182  B0 00				MOV AL, 0 ; read only
+ 1184  8D 16 0054 R			LEA DX, RightFrameRightFilename
+ 1188  CD 21				INT 21h
+ 118A  A3 005E R			MOV [RightFrameRightFilehandle], AX
+				
+					;read file
+ 118D  B4 3F				MOV AH,3Fh
+ 118F  8B 1E 005E R			MOV BX, [RightFrameRightFilehandle]
+ 1193  B9 583D				MOV CX, RightFrameRightWidth*RightFrame
+				RightHeight ; number of bytes to read
+ 1196  8D 16 3B06 R			LEA DX, TallFrameData
+ 119A  CD 21				INT 21h
+				
+					;close file
+ 119C  B4 3E				MOV AH, 3Eh
+ 119E  8B 1E 005E R			MOV BX, [RightFrameRightFilehandle]
+ 11A2  CD 21				INT 21h
+					
+					;drawing fire Right
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Page     1-93
+
+
+ 11A4  8D 1E 3B06 R			LEA BX, TallFrameData	 ; BL contains 
+				index at the current drawn pixel
+ 11A8  B9 031D				MOV CX, RightFrameRightX
+ 11AB  BA 0036				MOV DX, RightFrameRightY
+ 11AE  B4 0C				MOV AH, 0ch
+				
+ 11B0					drawfireRight:
+ 11B0  8A 07					MOV AL,[BX]
+ 11B2  CD 10					INT 10h 
+ 11B4  41					INC CX
+ 11B5  43					INC BX
+ 11B6  81 F9 034E				CMP CX, RightFrameRightWidth + 
+				RightFrameRightX
+ 11BA  75 F4				JNE drawfireRight 
+						
+ 11BC  B9 031D					MOV CX , RightFrameRightX
+ 11BF  42					INC DX
+ 11C0  81 FA 0203				CMP DX, RightFrameRightHeight +
+				 RightFrameRightY
+ 11C4  75 EA				JNE drawfireRight
+				
+					;------------done-------------
+					
+ 11C6  C3							RET
+ 11C7				DrawRightBorder	ENDP
+				;-------------------------
+				END     MAIN
+
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Symbols-1
+
+
+Macros:
+
+		N a m e			Lines
+
+POPA . . . . . . . . . . . . . .  	   8
+PUSHA  . . . . . . . . . . . . .  	   8
+
+Segments and Groups:
+
+                N a m e         	Length	 Align	Combine Class
+
+DGROUP . . . . . . . . . . . . .  	GROUP
+  _DATA  . . . . . . . . . . . .  	ABF4	WORD	PUBLIC	'DATA'
+  STACK  . . . . . . . . . . . .  	0200	PARA	STACK	'STACK'
+TETRI_TEXT . . . . . . . . . . .  	11C7	WORD	PUBLIC	'CODE'
+
+Symbols:            
+
+                N a m e         	Type	 Value	 Attr
+
+ADDPOWERUPCHECK  . . . . . . . .  	N PROC	0E2F	TETRI_TEXT	Length = 0048
+ADDTWOLINESBREAK . . . . . . . .  	L NEAR	0F89	TETRI_TEXT
+ADDTWOLINESSIIS4 . . . . . . . .  	L NEAR	0F86	TETRI_TEXT
+
+BLOCKEMPTY . . . . . . . . . . .  	L NEAR	07AA	TETRI_TEXT
+BLOCKSIZE  . . . . . . . . . . .  	NUMBER	0014	
+BREAK  . . . . . . . . . . . . .  	L NEAR	0449	TETRI_TEXT
+BREAKMOVEPIECE . . . . . . . . .  	L NEAR	036A	TETRI_TEXT
+BREAKPARSEINPUT  . . . . . . . .  	L NEAR	0674	TETRI_TEXT
+BREAKPOWERUP1  . . . . . . . . .  	L NEAR	0551	TETRI_TEXT
+BREAKPOWERUP2  . . . . . . . . .  	L NEAR	0571	TETRI_TEXT
+BREAKPOWERUP3  . . . . . . . . .  	L NEAR	0591	TETRI_TEXT
+BREAKPOWERUP4  . . . . . . . . .  	L NEAR	05B1	TETRI_TEXT
+BREAKPOWERUP5  . . . . . . . . .  	L NEAR	05D1	TETRI_TEXT
+BREAKRESETPIECESPEED . . . . . .  	L NEAR	0EF2	TETRI_TEXT
+BREAKROTPARSEINPUT . . . . . . .  	L NEAR	04E9	TETRI_TEXT
+BREAKUNFREEZEROTATION  . . . . .  	L NEAR	0F50	TETRI_TEXT
+
+CHANGEPIECE  . . . . . . . . . .  	N PROC	0F59	TETRI_TEXT	Length = 001A
+CHANGESCORETOTEXT  . . . . . . .  	N PROC	0C00	TETRI_TEXT	Length = 003F
+CHECK2 . . . . . . . . . . . . .  	L NEAR	06BD	TETRI_TEXT
+CHECK4GAME . . . . . . . . . . .  	L NEAR	0A74	TETRI_TEXT
+CHECKCOLLISION . . . . . . . . .  	N PROC	07C8	TETRI_TEXT	Length = 0014
+CHECKCOLLISIONWITHBLOCKS . . . .  	N PROC	0718	TETRI_TEXT	Length = 0056
+CHECKCOLLISIONWITHFRAME  . . . .  	N PROC	076E	TETRI_TEXT	Length = 005A
+CHECKCOLLISIONWITHFRAMELOOP  . .  	L NEAR	0781	TETRI_TEXT
+CHECKLINECLEAR . . . . . . . . .  	N PROC	0931	TETRI_TEXT	Length = 0065
+CHECKLINELOOPX . . . . . . . . .  	L NEAR	0942	TETRI_TEXT
+CHECKLINELOOPY . . . . . . . . .  	L NEAR	093C	TETRI_TEXT
+CHECKLINESIIS0 . . . . . . . . .  	L NEAR	0974	TETRI_TEXT
+CHECKLINESIIS4 . . . . . . . . .  	L NEAR	0982	TETRI_TEXT
+CHECKLINESKIPINC . . . . . . . .  	L NEAR	0954	TETRI_TEXT
+CHECKLINESKIPRMV . . . . . . . .  	L NEAR	0987	TETRI_TEXT
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Symbols-2
+
+
+CHECKNEXTBYTE  . . . . . . . . .  	L NEAR	0751	TETRI_TEXT
+CHECKR . . . . . . . . . . . . .  	L NEAR	0B7C	TETRI_TEXT
+CKESC  . . . . . . . . . . . . .  	L NEAR	0BF7	TETRI_TEXT
+CLEARFIRSTLINE . . . . . . . . .  	L NEAR	08F6	TETRI_TEXT
+CLOSELOGOFILE  . . . . . . . . .  	N PROC	09E7	TETRI_TEXT	Length = 0009
+COLL1  . . . . . . . . . . . . .  	L NEAR	06AE	TETRI_TEXT
+COLL2  . . . . . . . . . . . . .  	L NEAR	06DD	TETRI_TEXT
+COLLIDE  . . . . . . . . . . . .  	L NEAR	081C	TETRI_TEXT
+COLLISIONHAPPENS . . . . . . . .  	L NEAR	07D9	TETRI_TEXT
+COLLISIONPIECEDATA . . . . . . .  	L BYTE	AA16	_DATA	Length = 0010
+COLLISIONPIECEID . . . . . . . .  	L BYTE	AA12	_DATA
+COLLISIONPIECELOCX . . . . . . .  	L BYTE	AA14	_DATA
+COLLISIONPIECELOCY . . . . . . .  	L BYTE	AA15	_DATA
+COLLISIONPIECEORIENTATION  . . .  	L BYTE	AA13	_DATA
+COLLISIONPIECESPEED  . . . . . .  	L BYTE	AA26	_DATA
+COLLISIONWITHBLOCKHAPPENS  . . .  	L NEAR	0763	TETRI_TEXT
+COLLPIECEBRK . . . . . . . . . .  	L NEAR	0337	TETRI_TEXT
+CONTROLOP  . . . . . . . . . . .  	L NEAR	0BED	TETRI_TEXT
+COPYCOLL0  . . . . . . . . . . .  	L NEAR	0854	TETRI_TEXT
+COPYCOLLDATA0  . . . . . . . . .  	L NEAR	086D	TETRI_TEXT
+COPYDATA0  . . . . . . . . . . .  	L NEAR	03E1	TETRI_TEXT
+COPYDATA1  . . . . . . . . . . .  	L NEAR	0401	TETRI_TEXT
+COPYDATA2  . . . . . . . . . . .  	L NEAR	0421	TETRI_TEXT
+COPYDATA3  . . . . . . . . . . .  	L NEAR	043E	TETRI_TEXT
+COPYNEXTPIECEDATA  . . . . . . .  	N PROC	0D79	TETRI_TEXT	Length = 002A
+COPYPIECEDATA  . . . . . . . . .  	L NEAR	0707	TETRI_TEXT
+CPY  . . . . . . . . . . . . . .  	L NEAR	0D92	TETRI_TEXT
+
+DELETENEXTPIECE  . . . . . . . .  	N PROC	0DE9	TETRI_TEXT	Length = 0046
+DELETEPIECE  . . . . . . . . . .  	N PROC	026E	TETRI_TEXT	Length = 0048
+DELTASCORE . . . . . . . . . . .  	NUMBER	0001	
+DISPLAYMENU  . . . . . . . . . .  	N PROC	0AF0	TETRI_TEXT	Length = 009A
+DOWND  . . . . . . . . . . . . .  	L NEAR	034F	TETRI_TEXT
+DOWNDTEMP  . . . . . . . . . . .  	L NEAR	031F	TETRI_TEXT
+DRAWBLOCKCLR . . . . . . . . . .  	N PROC	01AE	TETRI_TEXT	Length = 0048
+DRAWFIREBOTTOM . . . . . . . . .  	L NEAR	1124	TETRI_TEXT
+DRAWFIRELEFT . . . . . . . . . .  	L NEAR	116A	TETRI_TEXT
+DRAWFIRERIGHT  . . . . . . . . .  	L NEAR	11B0	TETRI_TEXT
+DRAWFIRETOP  . . . . . . . . . .  	L NEAR	10DF	TETRI_TEXT
+DRAWFRAME  . . . . . . . . . . .  	L NEAR	00CA	TETRI_TEXT
+DRAWGAMESCR  . . . . . . . . . .  	N PROC	00C3	TETRI_TEXT	Length = 005B
+DRAWGUITEXT  . . . . . . . . . .  	N PROC	0C3F	TETRI_TEXT	Length = 00D0
+DRAWHOR  . . . . . . . . . . . .  	L NEAR	00DE	TETRI_TEXT
+DRAWICEBOTTOM  . . . . . . . . .  	L NEAR	0FC8	TETRI_TEXT
+DRAWICELEFT  . . . . . . . . . .  	L NEAR	1053	TETRI_TEXT
+DRAWICERIGHT . . . . . . . . . .  	L NEAR	1098	TETRI_TEXT
+DRAWICETOP . . . . . . . . . . .  	L NEAR	100E	TETRI_TEXT
+DRAWLEFTBORDER . . . . . . . . .  	N PROC	0F98	TETRI_TEXT	Length = 0117
+DRAWLOGO . . . . . . . . . . . .  	N PROC	09F0	TETRI_TEXT	Length = 0050
+DRAWLOGOMENU . . . . . . . . . .  	N PROC	0A40	TETRI_TEXT	Length = 003B
+DRAWLOOP . . . . . . . . . . . .  	L NEAR	09FF	TETRI_TEXT
+DRAWNEXTPIECE  . . . . . . . . .  	N PROC	0DA3	TETRI_TEXT	Length = 0046
+DRAWPIECE  . . . . . . . . . . .  	N PROC	02B6	TETRI_TEXT	Length = 0048
+DRAWPIECEISBLACK . . . . . . . .  	L NEAR	02EE	TETRI_TEXT
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Symbols-3
+
+
+DRAWPIECEISBLACK1  . . . . . . .  	L NEAR	0DD9	TETRI_TEXT
+DRAWPIECELOPX  . . . . . . . . .  	L NEAR	02CA	TETRI_TEXT
+DRAWPIECELOPX1 . . . . . . . . .  	L NEAR	0DB7	TETRI_TEXT
+DRAWPIXELHOR . . . . . . . . . .  	L NEAR	013F	TETRI_TEXT
+DRAWPIXELSFRAME  . . . . . . . .  	N PROC	011E	TETRI_TEXT	Length = 0063
+DRAWPIXELSFRAMELOOP  . . . . . .  	L NEAR	0125	TETRI_TEXT
+DRAWPIXELVER . . . . . . . . . .  	L NEAR	015F	TETRI_TEXT
+DRAWRIGHTBORDER  . . . . . . . .  	N PROC	10AF	TETRI_TEXT	Length = 0118
+DRAWVER  . . . . . . . . . . . .  	L NEAR	00F6	TETRI_TEXT
+
+ENDGAME  . . . . . . . . . . . .  	N PROC	0996	TETRI_TEXT	Length = 000B
+ENDGAMEMENU  . . . . . . . . . .  	N PROC	0BBE	TETRI_TEXT	Length = 0042
+ENTERCODE  . . . . . . . . . . .  	L BYTE	AA63	_DATA
+ESCCODE  . . . . . . . . . . . .  	L BYTE	AA67	_DATA
+EXITGAME . . . . . . . . . . . .  	L NEAR	0460	TETRI_TEXT
+EXITPROG . . . . . . . . . . . .  	L NEAR	0BBA	TETRI_TEXT
+EXT  . . . . . . . . . . . . . .  	L NEAR	0251	TETRI_TEXT
+EXT1 . . . . . . . . . . . . . .  	L NEAR	026C	TETRI_TEXT
+
+F10CODE  . . . . . . . . . . . .  	L BYTE	AA66	_DATA
+F1CODE . . . . . . . . . . . . .  	L BYTE	AA64	_DATA
+F2CODE . . . . . . . . . . . . .  	L BYTE	AA65	_DATA
+F2PRESSED  . . . . . . . . . . .  	L NEAR	0B67	TETRI_TEXT
+FIFTHPIECE . . . . . . . . . . .  	L BYTE	A926	_DATA
+FIFTHPIECE1  . . . . . . . . . .  	L BYTE	A936	_DATA
+FIFTHPIECE2  . . . . . . . . . .  	L BYTE	A946	_DATA
+FIFTHPIECE3  . . . . . . . . . .  	L BYTE	A956	_DATA
+FINISHED . . . . . . . . . . . .  	L NEAR	004B	TETRI_TEXT
+FIRSTPIECE . . . . . . . . . . .  	L BYTE	A826	_DATA
+FIRSTPIECE1  . . . . . . . . . .  	L BYTE	A836	_DATA
+FIRSTPIECE2  . . . . . . . . . .  	L BYTE	A846	_DATA
+FIRSTPIECE3  . . . . . . . . . .  	L BYTE	A856	_DATA
+FOURTHPIECE  . . . . . . . . . .  	L BYTE	A8E6	_DATA
+FOURTHPIECE1 . . . . . . . . . .  	L BYTE	A8F6	_DATA
+FOURTHPIECE2 . . . . . . . . . .  	L BYTE	A906	_DATA
+FOURTHPIECE3 . . . . . . . . . .  	L BYTE	A916	_DATA
+FRAMEHEIGHT  . . . . . . . . . .  	NUMBER	0014	
+FRAMETEXTOFFSET  . . . . . . . .  	NUMBER	0032	
+FRAMEWIDTH . . . . . . . . . . .  	NUMBER	000A	
+FREEZEROTATION . . . . . . . . .  	N PROC	0EFB	TETRI_TEXT	Length = 0029
+FREEZEROTATIONLEFTPIECE  . . . .  	L NEAR	0F16	TETRI_TEXT
+FREEZEROTATIONRIGHTPIECE . . . .  	L NEAR	0F08	TETRI_TEXT
+
+GAMEENDED  . . . . . . . . . . .  	N PROC	0B8A	TETRI_TEXT	Length = 0034
+GAMEENDED1 . . . . . . . . . . .  	L BYTE	ABB3	_DATA
+GAMEENDED2 . . . . . . . . . . .  	L BYTE	ABBD	_DATA
+GAMEFLAG . . . . . . . . . . . .  	L BYTE	ABF3	_DATA
+GAMELEFTSCRX . . . . . . . . . .  	L WORD	A81E	_DATA
+GAMELEFTSCRY . . . . . . . . . .  	L WORD	A820	_DATA
+GAMELP . . . . . . . . . . . . .  	L NEAR	003C	TETRI_TEXT
+GAMERIGHTSCRX  . . . . . . . . .  	L WORD	A822	_DATA
+GAMERIGHTSCRY  . . . . . . . . .  	L WORD	A824	_DATA
+GAMESCRHEIGHT  . . . . . . . . .  	NUMBER	0190	
+GAMESCRWIDTH . . . . . . . . . .  	NUMBER	00C8	
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Symbols-4
+
+
+GE1SZ  . . . . . . . . . . . . .  	NUMBER	000A	
+GE1X . . . . . . . . . . . . . .  	NUMBER	0035	
+GE1Y . . . . . . . . . . . . . .  	NUMBER	0020	
+GE2SZ  . . . . . . . . . . . . .  	NUMBER	0019	
+GE2X . . . . . . . . . . . . . .  	NUMBER	002F	
+GE2Y . . . . . . . . . . . . . .  	NUMBER	0022	
+GENERATERANDOMNUMBER . . . . . .  	N PROC	082B	TETRI_TEXT	Length = 0017
+GENERATERANDOMPIECE  . . . . . .  	N PROC	07DC	TETRI_TEXT	Length = 004F
+GETBLOCKCLR  . . . . . . . . . .  	N PROC	0181	TETRI_TEXT	Length = 002D
+GETMESSAGE . . . . . . . . . . .  	N PROC	09A6	TETRI_TEXT	Length = 0005
+GETNAME  . . . . . . . . . . . .  	N PROC	0A7B	TETRI_TEXT	Length = 0075
+GETTEMPNEXTPIECE . . . . . . . .  	N PROC	0253	TETRI_TEXT	Length = 001B
+GETTEMPPIECE . . . . . . . . . .  	N PROC	0238	TETRI_TEXT	Length = 001B
+GRAYBLOCKCLR . . . . . . . . . .  	NUMBER	0008	
+
+INITIALIZENEWGAME  . . . . . . .  	N PROC	0053	TETRI_TEXT	Length = 0070
+INSERTLINE . . . . . . . . . . .  	N PROC	0908	TETRI_TEXT	Length = 0025
+INSERTLINELOOPX  . . . . . . . .  	L NEAR	091B	TETRI_TEXT
+INSERTTWOLINES . . . . . . . . .  	N PROC	0F73	TETRI_TEXT	Length = 0025
+ISBLACK  . . . . . . . . . . . .  	L NEAR	02A6	TETRI_TEXT
+ISBLACK1 . . . . . . . . . . . .  	L NEAR	0E1F	TETRI_TEXT
+
+L2SZ . . . . . . . . . . . . . .  	NUMBER	0018	
+L3SZ . . . . . . . . . . . . . .  	NUMBER	001D	
+L4SZ . . . . . . . . . . . . . .  	NUMBER	0019	
+LEFTD  . . . . . . . . . . . . .  	L NEAR	0359	TETRI_TEXT
+LEFTDOWNCODE . . . . . . . . . .  	L BYTE	AA51	_DATA
+LEFTDOWNKEY  . . . . . . . . . .  	L NEAR	04A0	TETRI_TEXT
+LEFTDTEMP  . . . . . . . . . . .  	L NEAR	0328	TETRI_TEXT
+LEFTFRAMEBOTTOMFILEHANDLE  . . .  	L WORD	0035	_DATA
+LEFTFRAMEBOTTOMFILENAME  . . . .  	L BYTE	002A	_DATA
+LEFTFRAMEBOTTOMHEIGHT  . . . . .  	NUMBER	0036	
+LEFTFRAMEBOTTOMWIDTH . . . . . .  	NUMBER	00C5	
+LEFTFRAMEBOTTOMX . . . . . . . .  	NUMBER	0065	
+LEFTFRAMEBOTTOMY . . . . . . . .  	NUMBER	01C3	
+LEFTFRAMELEFTFILEHANDLE  . . . .  	L WORD	0019	_DATA
+LEFTFRAMELEFTFILENAME  . . . . .  	L BYTE	000D	_DATA
+LEFTFRAMELEFTHEIGHT  . . . . . .  	NUMBER	01AA	
+LEFTFRAMELEFTWIDTH . . . . . . .  	NUMBER	0033	
+LEFTFRAMELEFTX . . . . . . . . .  	NUMBER	0033	
+LEFTFRAMELEFTY . . . . . . . . .  	NUMBER	0036	
+LEFTFRAMERIGHTFILEHANDLE . . . .  	L WORD	0028	_DATA
+LEFTFRAMERIGHTFILENAME . . . . .  	L BYTE	001B	_DATA
+LEFTFRAMERIGHTHEIGHT . . . . . .  	NUMBER	01AA	
+LEFTFRAMERIGHTWIDTH  . . . . . .  	NUMBER	002B	
+LEFTFRAMERIGHTX  . . . . . . . .  	NUMBER	0129	
+LEFTFRAMERIGHTY  . . . . . . . .  	NUMBER	0036	
+LEFTFRAMETOPFILEHANDLE . . . . .  	L WORD	000B	_DATA
+LEFTFRAMETOPFILENAME . . . . . .  	L BYTE	0000	_DATA
+LEFTFRAMETOPHEIGHT . . . . . . .  	NUMBER	0036	
+LEFTFRAMETOPWIDTH  . . . . . . .  	NUMBER	00DB	
+LEFTFRAMETOPX  . . . . . . . . .  	NUMBER	005A	
+LEFTFRAMETOPY  . . . . . . . . .  	NUMBER	0000	
+LEFTLEFTCODE . . . . . . . . . .  	L BYTE	AA52	_DATA
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Symbols-5
+
+
+LEFTLEFTKEY  . . . . . . . . . .  	L NEAR	0488	TETRI_TEXT
+LEFTNEXTPIECELOCX  . . . . . . .  	NUMBER	002D	
+LEFTNEXTPIECELOCY  . . . . . . .  	NUMBER	0004	
+LEFTPIECEDATA  . . . . . . . . .  	L BYTE	A9EA	_DATA	Length = 0010
+LEFTPIECEID  . . . . . . . . . .  	L BYTE	A9E6	_DATA
+LEFTPIECELOCX  . . . . . . . . .  	L BYTE	A9E8	_DATA
+LEFTPIECELOCY  . . . . . . . . .  	L BYTE	A9E9	_DATA
+LEFTPIECEORIENTATION . . . . . .  	L BYTE	A9E7	_DATA
+LEFTPIECEROTATIONLOCK  . . . . .  	L BYTE	A816	_DATA
+LEFTPIECESPEED . . . . . . . . .  	L BYTE	A9FA	_DATA
+LEFTPLYLOCX  . . . . . . . . . .  	NUMBER	000D	
+LEFTPLYLOCY  . . . . . . . . . .  	ALIAS	 LEFTSCORELOCY		
+LEFTPOWER1 . . . . . . . . . . .  	L BYTE	AA55	_DATA
+LEFTPOWER2 . . . . . . . . . . .  	L BYTE	AA56	_DATA
+LEFTPOWER3 . . . . . . . . . . .  	L BYTE	AA57	_DATA
+LEFTPOWER4 . . . . . . . . . . .  	L BYTE	AA58	_DATA
+LEFTPOWER5 . . . . . . . . . . .  	L BYTE	AA59	_DATA
+LEFTPOWERUP1 . . . . . . . . . .  	L NEAR	0534	TETRI_TEXT
+LEFTPOWERUP2 . . . . . . . . . .  	L NEAR	0554	TETRI_TEXT
+LEFTPOWERUP3 . . . . . . . . . .  	L NEAR	0574	TETRI_TEXT
+LEFTPOWERUP4 . . . . . . . . . .  	L NEAR	0594	TETRI_TEXT
+LEFTPOWERUP5 . . . . . . . . . .  	L NEAR	05B4	TETRI_TEXT
+LEFTPOWERUPCHANGEPIECECOUNT  . .  	L BYTE	A814	_DATA
+LEFTPOWERUPFREEZECOUNT . . . . .  	L BYTE	A811	_DATA
+LEFTPOWERUPINSERTTWOLINESCOUNT .  	L BYTE	A815	_DATA
+LEFTPOWERUPREMOVELINESCOUNT  . .  	L BYTE	A813	_DATA
+LEFTPOWERUPSPEEDUPCOUNT  . . . .  	L BYTE	A812	_DATA
+LEFTRIGHTCODE  . . . . . . . . .  	L BYTE	AA53	_DATA
+LEFTRIGHTKEY . . . . . . . . . .  	L NEAR	04B8	TETRI_TEXT
+LEFTROTCODE  . . . . . . . . . .  	L BYTE	AA54	_DATA
+LEFTROTKEY . . . . . . . . . . .  	L NEAR	046C	TETRI_TEXT
+LEFTROTKEYPARSED . . . . . . . .  	L NEAR	0485	TETRI_TEXT
+LEFTSCORELOCX  . . . . . . . . .  	NUMBER	0017	
+LEFTSCORELOCY  . . . . . . . . .  	NUMBER	0021	
+LEFTSCORESTRINGLOCX  . . . . . .  	NUMBER	001E	
+LEFTSCORESTRINGLOCY  . . . . . .  	ALIAS	 LEFTSCORELOCY		
+LEFTSCORETEXT  . . . . . . . . .  	L BYTE	AA72	_DATA
+LEFTSCORETEXTLENGTH  . . . . . .  	NUMBER	0002	
+LOGO2  . . . . . . . . . . . . .  	L BYTE	AB65	_DATA
+LOGO3  . . . . . . . . . . . . .  	L BYTE	AB7D	_DATA
+LOGO4  . . . . . . . . . . . . .  	L BYTE	AB9A	_DATA
+LOGODATA . . . . . . . . . . . .  	L BYTE	A80F	_DATA
+LOGOFILEHANDLE . . . . . . . . .  	L WORD	A80B	_DATA
+LOGOFILENAME . . . . . . . . . .  	L BYTE	A802	_DATA
+LOGOFNX  . . . . . . . . . . . .  	NUMBER	01D3	
+LOGOFNY  . . . . . . . . . . . .  	NUMBER	00E6	
+LOGOHEIGHT . . . . . . . . . . .  	NUMBER	00C8	
+LOGOSTX  . . . . . . . . . . . .  	NUMBER	00AA	
+LOGOSTY  . . . . . . . . . . . .  	NUMBER	001E	
+LOGOWIDTH  . . . . . . . . . . .  	NUMBER	0129	
+LOOPOVERPIECEDATA  . . . . . . .  	L NEAR	072B	TETRI_TEXT
+LOOPX  . . . . . . . . . . . . .  	L NEAR	01DC	TETRI_TEXT
+LOOPY  . . . . . . . . . . . . .  	L NEAR	01E1	TETRI_TEXT
+LOPX . . . . . . . . . . . . . .  	L NEAR	0282	TETRI_TEXT
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Symbols-6
+
+
+LOPX1  . . . . . . . . . . . . .  	L NEAR	0DFD	TETRI_TEXT
+
+M11SZ  . . . . . . . . . . . . .  	NUMBER	0017	
+M12SZ  . . . . . . . . . . . . .  	NUMBER	001B	
+M21SZ  . . . . . . . . . . . . .  	NUMBER	0012	
+M22SZ  . . . . . . . . . . . . .  	NUMBER	0013	
+MAIN . . . . . . . . . . . . . .  	F PROC	0000	TETRI_TEXT	Length = 0053
+MENU11 . . . . . . . . . . . . .  	L BYTE	AB0E	_DATA
+MENU12 . . . . . . . . . . . . .  	L BYTE	AB25	_DATA
+MENU21 . . . . . . . . . . . . .  	L BYTE	AB40	_DATA
+MENU22 . . . . . . . . . . . . .  	L BYTE	AB52	_DATA
+MOVECURSOR . . . . . . . . . . .  	N PROC	09AB	TETRI_TEXT	Length = 0007
+MOVELEFT . . . . . . . . . . . .  	L NEAR	06A4	TETRI_TEXT
+MOVEPIECE  . . . . . . . . . . .  	N PROC	02FE	TETRI_TEXT	Length = 0079
+MOVERIGHT  . . . . . . . . . . .  	L NEAR	06D3	TETRI_TEXT
+MOVPIECEBRK  . . . . . . . . . .  	L NEAR	036A	TETRI_TEXT
+
+NAME1  . . . . . . . . . . . . .  	L BYTE	ABDA	_DATA
+NAME2  . . . . . . . . . . . . .  	L BYTE	ABE6	_DATA
+NAMESZ . . . . . . . . . . . . .  	NUMBER	0006	
+NEWGAME  . . . . . . . . . . . .  	L NEAR	000A	TETRI_TEXT
+NEXTLEFTPIECEDATA  . . . . . . .  	L BYTE	AA2B	_DATA	Length = 0010
+NEXTLEFTPIECEID  . . . . . . . .  	L BYTE	AA27	_DATA
+NEXTLEFTPIECELOCX  . . . . . . .  	L BYTE	AA29	_DATA
+NEXTLEFTPIECELOCY  . . . . . . .  	L BYTE	AA2A	_DATA
+NEXTLEFTPIECEORIENTATION . . . .  	L BYTE	AA28	_DATA
+NEXTPIECETEXT  . . . . . . . . .  	L BYTE	AA68	_DATA
+NEXTPIECETEXTLENGTH  . . . . . .  	NUMBER	0004	
+NEXTRIGHTPIECEDATA . . . . . . .  	L BYTE	AA3F	_DATA	Length = 0010
+NEXTRIGHTPIECEID . . . . . . . .  	L BYTE	AA3B	_DATA
+NEXTRIGHTPIECELOCX . . . . . . .  	L BYTE	AA3D	_DATA
+NEXTRIGHTPIECELOCY . . . . . . .  	L BYTE	AA3E	_DATA
+NEXTRIGHTPIECEORIENTATION  . . .  	L BYTE	AA3C	_DATA
+NOPOWERUP  . . . . . . . . . . .  	L NEAR	0E6E	TETRI_TEXT
+NO_CHANGE  . . . . . . . . . . .  	L NEAR	06EC	TETRI_TEXT
+
+OPENLOGOFILE . . . . . . . . . .  	N PROC	09C5	TETRI_TEXT	Length = 000E
+ORIEN  . . . . . . . . . . . . .  	L NEAR	03B9	TETRI_TEXT
+OUTOFSCREEN  . . . . . . . . . .  	L NEAR	07BC	TETRI_TEXT
+
+PARSEINPUT . . . . . . . . . . .  	N PROC	0455	TETRI_TEXT	Length = 0220
+PARSEINTTOSTRING . . . . . . . .  	N PROC	0D58	TETRI_TEXT	Length = 0021
+PIECEGRAVITY . . . . . . . . . .  	N PROC	0675	TETRI_TEXT	Length = 0080
+PLAYER1  . . . . . . . . . . . .  	L BYTE	ABDC	_DATA	Length = 000A
+PLAYER1SCORE . . . . . . . . . .  	L BYTE	A810	_DATA
+PLAYER2  . . . . . . . . . . . .  	L BYTE	ABE8	_DATA	Length = 000A
+PLAYER2SCORE . . . . . . . . . .  	L BYTE	A817	_DATA
+PLY1SZ . . . . . . . . . . . . .  	L BYTE	ABDB	_DATA
+PLY2SZ . . . . . . . . . . . . .  	L BYTE	ABE7	_DATA
+POSITIONINLOGOFILE . . . . . . .  	L WORD	A80D	_DATA
+POWERUPBREAK . . . . . . . . . .  	L NEAR	0E47	TETRI_TEXT
+POWERUPEVERYPOINT  . . . . . . .  	NUMBER	0004	
+POWERUPSIIS4 . . . . . . . . . .  	L NEAR	0E43	TETRI_TEXT
+PRESSESCTOEXITSTRING . . . . . .  	L BYTE	AAF6	_DATA
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Symbols-7
+
+
+PRESSESCTOEXITSTRINGLENGTH . . .  	NUMBER	0018	
+PRINTCHAR  . . . . . . . . . . .  	N PROC	09B2	TETRI_TEXT	Length = 000A
+PRINTMESSAGE . . . . . . . . . .  	N PROC	09BC	TETRI_TEXT	Length = 0009
+
+READLOGODATA . . . . . . . . . .  	N PROC	09D3	TETRI_TEXT	Length = 0014
+READY  . . . . . . . . . . . . .  	L BYTE	ABD6	_DATA
+REMOVEFOURLINES  . . . . . . . .  	N PROC	0E77	TETRI_TEXT	Length = 0026
+REMOVEFOURLINESLOOP  . . . . . .  	L NEAR	0E8C	TETRI_TEXT
+REMOVELINE . . . . . . . . . . .  	N PROC	092D	TETRI_TEXT	Length = 0004
+RESETLEFTSPEED . . . . . . . . .  	L NEAR	0ED3	TETRI_TEXT
+RESETPIECESPEED  . . . . . . . .  	N PROC	0EC6	TETRI_TEXT	Length = 0035
+RESETRIGHTSPEED  . . . . . . . .  	L NEAR	0EE4	TETRI_TEXT
+RET2VIEWMENU . . . . . . . . . .  	L NEAR	0BBD	TETRI_TEXT
+RIGHT  . . . . . . . . . . . . .  	L NEAR	0249	TETRI_TEXT
+RIGHT1 . . . . . . . . . . . . .  	L NEAR	0264	TETRI_TEXT
+RIGHTD . . . . . . . . . . . . .  	L NEAR	0363	TETRI_TEXT
+RIGHTDOWNCODE  . . . . . . . . .  	L BYTE	AA5A	_DATA
+RIGHTDOWNKEY . . . . . . . . . .  	L NEAR	0504	TETRI_TEXT
+RIGHTDTEMP . . . . . . . . . . .  	L NEAR	0331	TETRI_TEXT
+RIGHTFRAMEBOTTOMFILEHANDLE . . .  	L WORD	006C	_DATA
+RIGHTFRAMEBOTTOMFILENAME . . . .  	L BYTE	0060	_DATA
+RIGHTFRAMEBOTTOMHEIGHT . . . . .  	NUMBER	003F	
+RIGHTFRAMEBOTTOMWIDTH  . . . . .  	NUMBER	00C7	
+RIGHTFRAMEBOTTOMX  . . . . . . .  	NUMBER	0256	
+RIGHTFRAMEBOTTOMY  . . . . . . .  	NUMBER	01C4	
+RIGHTFRAMELEFTFILEHANDLE . . . .  	L WORD	0052	_DATA
+RIGHTFRAMELEFTFILENAME . . . . .  	L BYTE	0045	_DATA
+RIGHTFRAMELEFTHEIGHT . . . . . .  	NUMBER	01CA	
+RIGHTFRAMELEFTWIDTH  . . . . . .  	NUMBER	0029	
+RIGHTFRAMELEFTX  . . . . . . . .  	NUMBER	0231	
+RIGHTFRAMELEFTY  . . . . . . . .  	NUMBER	0036	
+RIGHTFRAMERIGHTFILEHANDLE  . . .  	L WORD	005E	_DATA
+RIGHTFRAMERIGHTFILENAME  . . . .  	L BYTE	0054	_DATA
+RIGHTFRAMERIGHTHEIGHT  . . . . .  	NUMBER	01CD	
+RIGHTFRAMERIGHTWIDTH . . . . . .  	NUMBER	0031	
+RIGHTFRAMERIGHTX . . . . . . . .  	NUMBER	031D	
+RIGHTFRAMERIGHTY . . . . . . . .  	NUMBER	0036	
+RIGHTFRAMETOPFILEHANDLE  . . . .  	L WORD	0043	_DATA
+RIGHTFRAMETOPFILENAME  . . . . .  	L BYTE	0037	_DATA
+RIGHTFRAMETOPHEIGHT  . . . . . .  	NUMBER	0035	
+RIGHTFRAMETOPWIDTH . . . . . . .  	NUMBER	00F8	
+RIGHTFRAMETOPX . . . . . . . . .  	NUMBER	0240	
+RIGHTFRAMETOPY . . . . . . . . .  	NUMBER	0001	
+RIGHTLEFTCODE  . . . . . . . . .  	L BYTE	AA5B	_DATA
+RIGHTLEFTKEY . . . . . . . . . .  	L NEAR	04EC	TETRI_TEXT
+RIGHTNEXTPIECELOCX . . . . . . .  	NUMBER	006C	
+RIGHTNEXTPIECELOCY . . . . . . .  	NUMBER	0004	
+RIGHTPIECEDATA . . . . . . . . .  	L BYTE	A9FF	_DATA	Length = 0010
+RIGHTPIECEID . . . . . . . . . .  	L BYTE	A9FB	_DATA
+RIGHTPIECELOCX . . . . . . . . .  	L BYTE	A9FD	_DATA
+RIGHTPIECELOCY . . . . . . . . .  	L BYTE	A9FE	_DATA
+RIGHTPIECEORIENTATION  . . . . .  	L BYTE	A9FC	_DATA
+RIGHTPIECEROTATIONLOCK . . . . .  	L BYTE	A81D	_DATA
+RIGHTPIECESPEED  . . . . . . . .  	L BYTE	AA0F	_DATA
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Symbols-8
+
+
+RIGHTPLYLOCX . . . . . . . . . .  	NUMBER	004D	
+RIGHTPLYLOCY . . . . . . . . . .  	ALIAS	 RIGHTSCORELOCY		
+RIGHTPOWER1  . . . . . . . . . .  	L BYTE	AA5E	_DATA
+RIGHTPOWER2  . . . . . . . . . .  	L BYTE	AA5F	_DATA
+RIGHTPOWER3  . . . . . . . . . .  	L BYTE	AA60	_DATA
+RIGHTPOWER4  . . . . . . . . . .  	L BYTE	AA61	_DATA
+RIGHTPOWER5  . . . . . . . . . .  	L BYTE	AA62	_DATA
+RIGHTPOWERUP1  . . . . . . . . .  	L NEAR	05D4	TETRI_TEXT
+RIGHTPOWERUP2  . . . . . . . . .  	L NEAR	05F4	TETRI_TEXT
+RIGHTPOWERUP3  . . . . . . . . .  	L NEAR	0614	TETRI_TEXT
+RIGHTPOWERUP4  . . . . . . . . .  	L NEAR	0634	TETRI_TEXT
+RIGHTPOWERUP5  . . . . . . . . .  	L NEAR	0654	TETRI_TEXT
+RIGHTPOWERUPCHANGEPIECECOUNT . .  	L BYTE	A81B	_DATA
+RIGHTPOWERUPFREEZECOUNT  . . . .  	L BYTE	A818	_DATA
+RIGHTPOWERUPINSERTTWOLINESCOUNT   	L BYTE	A81C	_DATA
+RIGHTPOWERUPREMOVELINESCOUNT . .  	L BYTE	A81A	_DATA
+RIGHTPOWERUPSPEEDUPCOUNT . . . .  	L BYTE	A819	_DATA
+RIGHTRIGHTCODE . . . . . . . . .  	L BYTE	AA5C	_DATA
+RIGHTRIGHTKEY  . . . . . . . . .  	L NEAR	051C	TETRI_TEXT
+RIGHTROTCODE . . . . . . . . . .  	L BYTE	AA5D	_DATA
+RIGHTROTKEY  . . . . . . . . . .  	L NEAR	04D0	TETRI_TEXT
+RIGHTSCORELOCX . . . . . . . . .  	NUMBER	0057	
+RIGHTSCORELOCY . . . . . . . . .  	NUMBER	0021	
+RIGHTSCORESTRINGLOCX . . . . . .  	NUMBER	005E	
+RIGHTSCORESTRINGLOCY . . . . . .  	ALIAS	 RIGHTSCORELOCY		
+RIGHTSCORETEXT . . . . . . . . .  	L BYTE	AA74	_DATA
+RIGHTSCORETEXTLENGTH . . . . . .  	NUMBER	0002	
+ROTATE180  . . . . . . . . . . .  	L NEAR	03EC	TETRI_TEXT
+ROTATE270  . . . . . . . . . . .  	L NEAR	040C	TETRI_TEXT
+ROTATE360  . . . . . . . . . . .  	L NEAR	042C	TETRI_TEXT
+ROTATE90 . . . . . . . . . . . .  	L NEAR	03CC	TETRI_TEXT
+ROTATEPIECE  . . . . . . . . . .  	N PROC	0377	TETRI_TEXT	Length = 00DE
+ROTATIONCOLLISION  . . . . . . .  	N PROC	0842	TETRI_TEXT	Length = 0041
+RPLY1  . . . . . . . . . . . . .  	L BYTE	ABD7	_DATA
+RPLY2  . . . . . . . . . . . . .  	L BYTE	ABD8	_DATA
+
+SCORETEXT  . . . . . . . . . . .  	L BYTE	AA6C	_DATA
+SCORETEXTLENGTH  . . . . . . . .  	NUMBER	0006	
+SECONDPIECE  . . . . . . . . . .  	L BYTE	A866	_DATA
+SECONDPIECE1 . . . . . . . . . .  	L BYTE	A876	_DATA
+SECONDPIECE2 . . . . . . . . . .  	L BYTE	A886	_DATA
+SECONDPIECE3 . . . . . . . . . .  	L BYTE	A896	_DATA
+SECONDS  . . . . . . . . . . . .  	L BYTE	ABF2	_DATA
+SELECTMODE . . . . . . . . . . .  	L NEAR	0A61	TETRI_TEXT
+SETCOLLISIONPIECE  . . . . . . .  	N PROC	06F5	TETRI_TEXT	Length = 0023
+SETNEXTPIECEDATA . . . . . . . .  	N PROC	01F6	TETRI_TEXT	Length = 0042
+SETSCRPIECELOP . . . . . . . . .  	L NEAR	0222	TETRI_TEXT
+SEVENTHPIECE . . . . . . . . . .  	L BYTE	A9A6	_DATA
+SEVENTHPIECE1  . . . . . . . . .  	L BYTE	A9B6	_DATA
+SEVENTHPIECE2  . . . . . . . . .  	L BYTE	A9C6	_DATA
+SEVENTHPIECE3  . . . . . . . . .  	L BYTE	A9D6	_DATA
+SHIFTDOWNLOOPX . . . . . . . . .  	L NEAR	08DA	TETRI_TEXT
+SHIFTDOWNLOOPY . . . . . . . . .  	L NEAR	08D7	TETRI_TEXT
+SHIFTLINESDOWN . . . . . . . . .  	N PROC	08CF	TETRI_TEXT	Length = 0039
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Symbols-9
+
+
+SHIFTLINESUP . . . . . . . . . .  	N PROC	0883	TETRI_TEXT	Length = 004C
+SHIFTUPLOOPX . . . . . . . . . .  	L NEAR	089A	TETRI_TEXT
+SHIFTUPLOOPY . . . . . . . . . .  	L NEAR	0897	TETRI_TEXT
+SHIFTUPNOCOLLISION . . . . . . .  	L NEAR	08C3	TETRI_TEXT
+SIXTHPIECE . . . . . . . . . . .  	L BYTE	A966	_DATA
+SIXTHPIECE1  . . . . . . . . . .  	L BYTE	A976	_DATA
+SIXTHPIECE2  . . . . . . . . . .  	L BYTE	A986	_DATA
+SIXTHPIECE3  . . . . . . . . . .  	L BYTE	A996	_DATA
+SKIPPIXEL  . . . . . . . . . . .  	L NEAR	0A2B	TETRI_TEXT
+SPACE  . . . . . . . . . . . . .  	L BYTE	ABD9	_DATA
+SPEEDUPLEFTPLAYER  . . . . . . .  	L NEAR	0EB8	TETRI_TEXT
+SPEEDUPOPPONENTPIECE . . . . . .  	N PROC	0E9D	TETRI_TEXT	Length = 0029
+SPEEDUPRIGHTPLAYER . . . . . . .  	L NEAR	0EAA	TETRI_TEXT
+
+TALLFRAMEDATA  . . . . . . . . .  	L BYTE	3B06	_DATA	Length = 6CFC
+TALLFRAMEHEIGHT  . . . . . . . .  	NUMBER	01D1	
+TALLFRAMEWIDTH . . . . . . . . .  	NUMBER	003C	
+TEMPNEXTPIECEOFFSET  . . . . . .  	L WORD	AA4F	_DATA
+TEMPPIECEOFFSET  . . . . . . . .  	L WORD	AA10	_DATA
+THIRDPIECE . . . . . . . . . . .  	L BYTE	A8A6	_DATA
+THIRDPIECE1  . . . . . . . . . .  	L BYTE	A8B6	_DATA
+THIRDPIECE2  . . . . . . . . . .  	L BYTE	A8C6	_DATA
+THIRDPIECE3  . . . . . . . . . .  	L BYTE	A8D6	_DATA
+
+UNDERLINESTRING  . . . . . . . .  	L BYTE	AA76	_DATA
+UNDERLINESTRINGLENGTH  . . . . .  	NUMBER	0080	
+UNFREEZELEFTSCREEN . . . . . . .  	L NEAR	0F31	TETRI_TEXT
+UNFREEZERIGHTSCREEN  . . . . . .  	L NEAR	0F42	TETRI_TEXT
+UNFREEZEROTATION . . . . . . . .  	N PROC	0F24	TETRI_TEXT	Length = 0035
+UPDATEPLAYERSSCORE . . . . . . .  	N PROC	0D0F	TETRI_TEXT	Length = 0038
+UPDATEPOWERUPSSCORE  . . . . . .  	N PROC	0D47	TETRI_TEXT	Length = 0011
+
+WAIT4ENTER . . . . . . . . . . .  	L NEAR	0AAC	TETRI_TEXT
+WAIT4ENTER2  . . . . . . . . . .  	L NEAR	0AE6	TETRI_TEXT
+WAIT4KEY . . . . . . . . . . . .  	N PROC	09A1	TETRI_TEXT	Length = 0005
+WAIT4READY . . . . . . . . . . .  	L NEAR	0B40	TETRI_TEXT
+WIDEFRAMEDATA  . . . . . . . . .  	L BYTE	006E	_DATA	Length = 3A98
+WIDEFRAMEHEIGHT  . . . . . . . .  	NUMBER	003C	
+WIDEFRAMEWIDTH . . . . . . . . .  	NUMBER	00FA	
+
+YESINPUT . . . . . . . . . . . .  	L NEAR	045C	TETRI_TEXT
+
+@CODE  . . . . . . . . . . . . .  	TEXT  Tetri_TEXT		
+@CODESIZE  . . . . . . . . . . .  	TEXT  1		
+@CPU . . . . . . . . . . . . . .  	TEXT  0101h		
+@DATASIZE  . . . . . . . . . . .  	TEXT  2		
+@FILENAME  . . . . . . . . . . .  	TEXT  Tetri		
+@VERSION . . . . . . . . . . . .  	TEXT  510		
+
+Microsoft (R) Macro Assembler Version 5.10                  5/16/25 00:51:37
+                                                             Symbols-10
+
+
+
+   3100 Source  Lines
+   3668 Total   Lines
+    453 Symbols
+
+  47570 + 416788 Bytes symbol space free
+
+      0 Warning Errors
+      0 Severe  Errors
